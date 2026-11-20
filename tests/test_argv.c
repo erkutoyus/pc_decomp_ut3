@@ -1,6 +1,6 @@
 /* Windows-native oracle vectors exercise the actual export and LocalFree ABI. */
-#include "../android/host/argv.c"
-#include "../android/host/pe.c"
+#include "../engine/host/argv.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

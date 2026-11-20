@@ -60,7 +60,7 @@ static void void_log(const char *format, ...) { (void)format; ++reports; }
 ''']
         pins, selectors, fields, files = {}, [], [], []
         for name, field, loader, _, _ in MODULES:
-            path = ROOT / "android/host" / (name + ".c")
+            path = ROOT / "engine/host" / (name + ".c")
             text = path.read_text(encoding="utf-8")
             pins[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
             actual = function(text, loader)
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 ''')
         probe = OUT / "probe.c"
         probe.write_text("\n".join(source), encoding="utf-8")
-        helper = ROOT / "android/host/native_mode.inc"
+        helper = ROOT / "engine/host/native_mode.inc"
         pins[str(helper.relative_to(ROOT))] = hashlib.sha256(helper.read_bytes()).hexdigest()
         env, linker = environment("x64")
         env.pop("UT3_EXECUTION_MODE", None)

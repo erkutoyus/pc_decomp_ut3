@@ -10,9 +10,9 @@
 #endif
 #include <assert.h>
 #include <stdio.h>
-#include "../android/host/input.c"
-#include "../android/host/touch_game.c"
-#include "../android/host/touch_menu.c"
+#include "../engine/host/input.c"
+#include "../engine/host/touch_game.c"
+#include "../engine/host/touch_menu.c"
 
 enum { TEST_SIZE=0x02000000, ENGINE=0x100000, VIEWPORT=0x110000,
        ENGINE_CLASS=0x120000, PORT_CLASS=0x121000, OBJECT_KIND=0x122000,

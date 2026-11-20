@@ -8,7 +8,7 @@ static int affinity_get(pid_t,size_t,cpu_set_t *);
 static int affinity_set(pid_t,size_t,const cpu_set_t *);
 #define sched_getaffinity affinity_get
 #define sched_setaffinity affinity_set
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #undef sched_getaffinity
 #undef sched_setaffinity
 #include <assert.h>

@@ -30,10 +30,10 @@ def main():
     out = ROOT / 'build/local-regs-tests'
     out.mkdir(parents=True, exist_ok=True)
 
-    core = (ROOT / 'android/host/core.c').read_text(encoding='utf-8')
+    core = (ROOT / 'engine/host/core.c').read_text(encoding='utf-8')
     start = core.index('VOID_HIDDEN uint32_t g_eax')
     end = core.index('/* --------------------------------------------------------------- logging */')
-    threads = (ROOT / 'android/host/threads.c').read_text(encoding='utf-8')
+    threads = (ROOT / 'engine/host/threads.c').read_text(encoding='utf-8')
     callback = re.search(r'uint32_t void_call_guest\(.*?(?=\nuint32_t void_call_guest_this)', threads, re.S)
     assert callback, 'Production guest-call helper was not found'
     context = out / 'production-context.c'
@@ -48,7 +48,7 @@ def main():
     sources = [context, ROOT / 'tests/local_regs_probes.c', ROOT / 'tests/test_local_regs.c', owner]
     flags = ['--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing', '-fwrapv',
              '-fvisibility=hidden', '-fPIC', '-ffp-contract=off', '-fno-math-errno', '-g0',
-             '-DRECOMP_X87_WINDOW', '-DEXPECT_LIVE_FLAGS', '-Iandroid/runtime', '-Iandroid/host',
+             '-DRECOMP_X87_WINDOW', '-DEXPECT_LIVE_FLAGS', '-Iengine/runtime', '-Iengine/host', '-Iengine/host',
              '-Igenerated/ut3']
     commands = []
     for variant, extra in [('global', []), ('local', ['-DRECOMP_LOCAL_REGS'])]:
@@ -73,8 +73,8 @@ def main():
     passed = passed and all(checksums) and checksums[0][1] == checksums[1][1]
     report = dict(status='PASS' if passed else 'FAIL', utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   device=args.serial, results=results, compile_commands=commands,
-                  sha256={str(p.relative_to(ROOT)): sha(p) for p in [*sources, ROOT / 'android/runtime/recomp_types.h',
-                      ROOT / 'android/host/core.c', ROOT / 'android/host/threads.c', ROOT / 'tests/test_local_regs.py',
+                  sha256={str(p.relative_to(ROOT)): sha(p) for p in [*sources, ROOT / 'engine/runtime/recomp_types.h',
+                      ROOT / 'engine/host/core.c', ROOT / 'engine/host/threads.c', ROOT / 'tests/test_local_regs.py',
                       out / 'global', out / 'local']},
                   scope='Current production header only; eight integer locals only. SSE/x87 global, no masked protocol, provenance or plain-memory flags.',
                   limits='Focused resolver/call/tail/backedge/EH and owner fixture, not full-engine validation or an FPS benchmark.')

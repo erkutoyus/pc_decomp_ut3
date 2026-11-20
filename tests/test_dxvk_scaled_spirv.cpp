@@ -1,4 +1,4 @@
-/* DXVK's SCALED vertex fallback (android/dxvk/scaled_vertex_spirv.inc) applied to a SPIR-V module the
+/* DXVK's SCALED vertex fallback (engine/dxvk/scaled_vertex_spirv.inc) applied to a SPIR-V module the
  * way DXVK applies it: convertIntegerInput (which calls the upstream eliminateInput) once per converted
  * location, in turn, on the same code. Built and driven by tests/test_dxvk_scaled_spirv.py against
  * build/dxvk-source: SpirvCodeBuffer and eliminateInput are DXVK's own, the overlay is the one under test.

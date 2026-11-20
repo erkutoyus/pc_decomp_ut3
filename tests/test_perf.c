@@ -1,6 +1,6 @@
 /* Late combat hitches stay visible only while opt-in profiling is enabled. */
 #define clock_gettime test_clock_gettime
-#include "../android/host/perf.c"
+#include "../engine/host/perf.c"
 #include <assert.h>
 #include <stdarg.h>
 #include <unistd.h>

@@ -59,8 +59,8 @@ def main():
     ndk = Path(os.environ.get("ANDROID_NDK_HOME", sdk / "ndk/27.2.12479018"))
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     flags = ['--target=aarch64-linux-android29', '-O1', '-DRECOMP_X87_WINDOW', '-DRECOMP_TRACE',
-             '-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke']
-    for path, obj in [('tests/test_pe_resources.c', 'test.o'), ('android/host/user32.c', 'user32.o')]:
+             '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke']
+    for path, obj in [('tests/test_pe_resources.c', 'test.o'), ('engine/host/user32.c', 'user32.o')]:
         subprocess.run([str(clang), *flags, '-c', path, '-o', str(output / obj)], cwd=ROOT, check=True)
     objects = (ROOT / 'build/host-smoke/test-pe-imports.rsp').read_text().splitlines()
     objects[0] = '"' + (output / 'test.o').as_posix() + '"'

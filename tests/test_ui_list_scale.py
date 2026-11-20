@@ -13,9 +13,9 @@ OUT = ROOT / 'build/ui-list-tests'
 class ListScaleTest(unittest.TestCase):
     def test_production_wrapper_and_live_getter(self):
         OUT.mkdir(parents=True, exist_ok=True)
-        runtime = (ROOT / 'android/runtime/recomp_types.h').read_text()
-        host = (ROOT / 'android/host/host.h').read_text()
-        core = (ROOT / 'android/host/core.c').read_text()
+        runtime = (ROOT / 'engine/runtime/recomp_types.h').read_text()
+        host = (ROOT / 'engine/host/host.h').read_text()
+        core = (ROOT / 'engine/host/core.c').read_text()
         regs = host[host.index('typedef struct void_regs {'):host.index('} void_regs;') + len('} void_regs;')]
         end = runtime.index('} xmm_t;') + len('} xmm_t;')
         xmm = runtime[runtime.rindex('typedef union {', 0, end):end]
@@ -58,9 +58,9 @@ uint32_t g_eh_obj,g_eh_info;
         sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
         report = {'status': 'PASS_HOST_PRODUCTION_WRAPPER_LIVE_GETTER_CORE_REGISTERS',
                   'commands': commands,
-                  'sources': {p: sha(ROOT / p) for p in ['android/host/ui_list_scale.c', 'android/host/touch_game.c',
+                  'sources': {p: sha(ROOT / p) for p in ['engine/host/ui_list_scale.c', 'engine/host/touch_game.c',
                                                        'tests/test_ui_list_scale.c', 'tests/test_ui_list_scale.py',
-                                                       'android/host/core.c', 'android/host/host.h']},
+                                                       'engine/host/core.c', 'engine/host/host.h']},
                   'log_sha256': sha(OUT / 'host.log'), 'device_executed': False,
                   'scope': 'Actual wrapper and typed getter with original core register save; formatter callback mocked. Original PE style-chain and full formatter covered separately.'}
         (OUT / 'receipt.json').write_text(json.dumps(report, indent=2) + '\n')

@@ -17,10 +17,10 @@ def main():
     sdk=Path(os.environ.get('ANDROID_SDK_ROOT',Path.home()/'AppData/Local/Android/Sdk'))
     clang=sdk/'ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     out=ROOT/'build/texconv';binary=out/'cache-gpu-check'
-    sources=['tests/test_texture_cache_gpu.c','android/host/d3d9_resource.c','android/host/d3d9_format.c',
-             'android/host/d3d9_texel.c','android/host/texture_cache.c','android/host/d3d9_thread.c']
+    sources=['tests/test_texture_cache_gpu.c','engine/host/d3d9_resource.c','engine/host/d3d9_format.c',
+             'engine/host/d3d9_texel.c','engine/host/texture_cache.c','engine/host/d3d9_thread.c']
     subprocess.run([str(clang),'--target=aarch64-linux-android29','-O2','-ffunction-sections','-fdata-sections',
-        '-Iandroid/runtime','-Iandroid/host','-Igenerated','-Ireference/mojoshader',*sources,'-Wl,--gc-sections',
+        '-Iengine/runtime','-Iengine/host', '-Iengine/host','-Igenerated','-Ireference/mojoshader',*sources,'-Wl,--gc-sections',
         '-lEGL','-lGLESv3','-lm','-o',str(binary)],cwd=ROOT,check=True)
     adb=[str(sdk/'platform-tools/adb.exe'),'-s',args.device]
     run=lambda *cmd: subprocess.run([*adb,*cmd],check=True,capture_output=True,text=True)

@@ -2,7 +2,7 @@
 
 Built with the NDK (glslc for its two shaders, clang++ with 16 KB page alignment, which Android 15+ phones such
 as the Pixel 10a need) and run from /data/local/tmp. It checks the system driver's occlusion queries that
-android/dxvk/query_pools.inc relies on: every slot of pools up to 4096 entries (the PowerVR pool) returns the real
+engine/dxvk/query_pools.inc relies on: every slot of pools up to 4096 entries (the PowerVR pool) returns the real
 sample count, a depth-hidden draw returns 0. The render-split cost of query pool changes inside a render is
 printed (the measurement behind query_pools.inc), not asserted: it is the driver's property, not the port's.
 

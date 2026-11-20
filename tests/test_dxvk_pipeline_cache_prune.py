@@ -1,4 +1,4 @@
-"""HOST-run the DXVK pipeline cache file names and pruning of android/dxvk/pipeline_cache.inc.
+"""HOST-run the DXVK pipeline cache file names and pruning of engine/dxvk/pipeline_cache.inc.
 
 The plain C++17 part (namespace pipecache_files) is taken from the overlay as it is, compiled with MSVC
 and run on temporary folders holding the files of several driver identities: the current file and the
@@ -78,7 +78,7 @@ def block(text, opening):
 class PipelineCachePruneTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        source = (ROOT / "android/dxvk/pipeline_cache.inc").read_text(encoding="utf-8")
+        source = (ROOT / "engine/dxvk/pipeline_cache.inc").read_text(encoding="utf-8")
         OUT.mkdir(parents=True, exist_ok=True)
         (OUT / "probe.cpp").write_text(HARNESS.replace("/* ACTUAL */", block(source, "  namespace pipecache_files {")),
                                        encoding="utf-8")

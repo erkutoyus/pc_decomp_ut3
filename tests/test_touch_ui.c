@@ -6,7 +6,7 @@
 #ifdef _WIN32
 #include "touch_host_win.h"
 #endif
-#include "../android/host/input.c"
+#include "../engine/host/input.c"
 
 enum { VIEWPORT=0x110000, MOVE=0x200, DOWN=0x201, UP=0x202 };
 typedef struct { uint32_t message,value,point; } posted_t;

@@ -20,7 +20,7 @@ def main():
     ndk = Path(os.environ.get("ANDROID_NDK_HOME", sdk / "ndk/27.2.12479018"))
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     OUT.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / "android/host/core.c").read_text()
+    core = (ROOT / "engine/host/core.c").read_text()
     context = OUT / "context.c"
     context.write_text('#include "host.h"\n' + core[core.index("VOID_HIDDEN uint32_t g_eax"):
         core.index("/* --------------------------------------------------------------- logging */")])
@@ -41,7 +41,7 @@ def main():
         'void sub_00F042C0(void); void sub_00F04350(void); void sub_00F04470(void); void sub_00EFB030(void); void sub_00EFB0C0(void);\n' + "\n".join(bodies))
     binary = OUT / "test-render-draw-native"
     command = [str(clang), "--target=aarch64-linux-android29", "-O2", "-fno-strict-aliasing", "-fwrapv",
-        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iandroid/runtime", "-Iandroid/host",
+        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iengine/runtime", "-Iengine/host", "-Iengine/host",
         str(context), str(oracle), str(ROOT / "tests/test_render_draw_native.c"), "-o", str(binary), "-lm"]
     built = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     (OUT / "build.log").write_text(built.stdout + built.stderr)

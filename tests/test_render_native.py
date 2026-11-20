@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build/render-native-tests"
 
@@ -24,7 +25,7 @@ def main():
     ndk = Path(os.environ.get("ANDROID_NDK_HOME", sdk / "ndk/27.2.12479018"))
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     OUT.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / "android/host/core.c").read_text()
+    core = (ROOT / "engine/host/core.c").read_text()
     context = OUT / "context.c"
     context.write_text('#include "host.h"\n' + core[core.index("VOID_HIDDEN uint32_t g_eax"):
         core.index("/* --------------------------------------------------------------- logging */")])
@@ -42,9 +43,9 @@ def main():
     declarations = 'void sub_0041FF80(void); void sub_0041FF60(void); void sub_0117C2A0(void);\n'
     oracle.write_text('#define RECOMP_GENERATED_CODE\n#include "recomp_types.h"\n' + declarations + "\n".join(bodies))
     sys.path.insert(0, str(ROOT / "tools"))
-    from build_android import DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, WRAPS, host_overrides, validate_native_call_contract
+    from lift_build import host_sources, DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, WRAPS, host_overrides, validate_native_call_contract
     from protocol_transform import Protocol, apply_protocol
-    full = (set(WRAPS) | host_overrides(sorted((ROOT / "android/host").glob("*.c")))) - NATIVE_CALL_CONTRACT
+    full = (set(WRAPS) | host_overrides(sorted(host_sources()))) - NATIVE_CALL_CONTRACT
     protocol = Protocol(DEFAULT_CALL_PROTOCOL, full=full, masked_native=NATIVE_CALL_CONTRACT)
     validate_native_call_contract(protocol)
     assert protocol.call_masks("sub_0117D890") == (0x17, 0x17, 0)
@@ -70,7 +71,7 @@ void render_bounds_masked_call(recomp_func_t target, const uint32_t *input, uint
     binary = OUT / "test-render-native"
     sources = [context, oracle, masked, ROOT / "tests/test_render_native.c"]
     command = [str(clang), "--target=aarch64-linux-android29", "-O2", "-fno-strict-aliasing", "-fwrapv",
-        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iandroid/runtime", "-Iandroid/host",
+        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iengine/runtime", "-Iengine/host", "-Iengine/host",
         *map(str, sources), "-o", str(binary), "-lm"]
     built = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     (OUT / "build.log").write_text(built.stdout + built.stderr)
@@ -87,7 +88,7 @@ void render_bounds_masked_call(recomp_func_t target, const uint32_t *input, uint
             print(ran.stdout + ran.stderr, end="")
         finally:
             subprocess.run([*adb, "shell", "rm", "-f", remote], capture_output=True)
-    files = [*sources, ROOT / "android/host/render_native.c", ROOT / "android/runtime/recomp_types.h", binary]
+    files = [*sources, ROOT / "engine/host/render_native.c", ROOT / "engine/runtime/recomp_types.h", binary]
     receipt = {"status": "BUILT_NOT_RUN" if result is None else "PASS" if result["returncode"] == 0 and
         "PASS native render:" in result["stdout"] else "FAIL", "device": args.serial, "command": command,
         "result": result, "sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}

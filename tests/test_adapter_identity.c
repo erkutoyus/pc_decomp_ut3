@@ -1,8 +1,8 @@
 /* Synthetic IPv4 lists exercise the production GetAdaptersInfo only. */
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #define getifaddrs fixture_getifaddrs
 #define freeifaddrs fixture_freeifaddrs
-#include "../android/host/network.c"
+#include "../engine/host/network.c"
 #undef getifaddrs
 #undef freeifaddrs
 #include <assert.h>

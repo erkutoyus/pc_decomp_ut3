@@ -1,5 +1,5 @@
 /* Production playback A/W callbacks and honest unavailable endpoint IDs. */
-#include "../android/host/dsound.c"
+#include "../engine/host/dsound.c"
 #include <assert.h>
 #include <unistd.h>
 
@@ -11,7 +11,11 @@ static void playback_callback(void)
     assert(ARG(0) == 0 && ARG(3) == callback_context);
     char *description = callback_wide ? void_wstr_utf8(ARG(1)) : void_astr_utf8(ARG(1));
     char *module = callback_wide ? void_wstr_utf8(ARG(2)) : void_astr_utf8(ARG(2));
+#ifdef __APPLE__
+    assert(description && !strcmp(description,"UT3 DirectSound software mixer"));
+#else
     assert(description && !strcmp(description,"Android DirectSound"));
+#endif
     assert(module && !strcmp(module,"dsound.dll"));
     free(description); free(module); ++callbacks;
     void_set_last_error(0x7777); g_eax=callback_result; g_esp+=20;

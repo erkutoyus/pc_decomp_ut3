@@ -1,4 +1,4 @@
-"""HOST-run DXVK's SCALED vertex fallback SPIR-V patch (android/dxvk/scaled_vertex_spirv.inc) and spirv-val it.
+"""HOST-run DXVK's SCALED vertex fallback SPIR-V patch (engine/dxvk/scaled_vertex_spirv.inc) and spirv-val it.
 
 DXVK calls convertIntegerInput once per converted vertex input on the same module: every unsigned
 location, then every signed one (tools/build_dxvk.py). Types a call declares go right before the
@@ -208,7 +208,7 @@ def function(text, name):
 
 
 def build_harness(overlay_dir, out):
-    """The harness with the overlay found in overlay_dir (android/dxvk, or a copy to compare with)."""
+    """The harness with the overlay found in overlay_dir (engine/dxvk, or a copy to compare with)."""
     out.mkdir(parents=True, exist_ok=True)
     shader = (DXVK / "src/dxvk/dxvk_shader.cpp").read_text(encoding="utf-8")
     eliminate = function(shader, "  void DxvkShader::eliminateInput(SpirvCodeBuffer& code, uint32_t location) {")
@@ -257,7 +257,7 @@ def run_case(harness, out, name, module, conversions, version):
                      "needs build/dxvk-source (tools/build_dxvk.py --rebuild) and the NDK shader tools")
 class ScaledVertexSpirvTest(unittest.TestCase):
     def test_conversions_validate(self):
-        harness = build_harness(ROOT / "android/dxvk", OUT)
+        harness = build_harness(ROOT / "engine/dxvk", OUT)
         for name, module, conversions, unsigned, signed in CASES:
             for version in ("spv1.3", "spv1.6"):
                 with self.subTest(case=name, version=version):

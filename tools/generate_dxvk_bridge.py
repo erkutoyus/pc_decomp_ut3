@@ -1,4 +1,5 @@
 """Generate x86 stack thunks and typed D3D9 dispatch from the pinned native headers."""
+import argparse
 import json
 from pathlib import Path
 import re
@@ -9,6 +10,9 @@ INTERFACES = ["IUnknown", "IDirect3D9", "IDirect3DDevice9", "IDirect3DResource9"
 SPECIAL = {"QueryInterface", "AddRef", "Release", "CreateDevice", "CreateAdditionalSwapChain", "Reset", "TestCooperativeLevel", "GetPresentParameters", "Present", "GetCreationParameters", "GetContainer", "Lock", "Unlock", "LockRect", "UnlockRect", "LockBox", "UnlockBox", "CreateVertexShader", "CreatePixelShader", "CreateVertexDeclaration", "DrawPrimitiveUP", "DrawIndexedPrimitiveUP", "GetFunction", "GetData", "GetPrivateData", "SetPrivateData", "FreePrivateData", "GetAdapterIdentifier", "GetAdapterMonitor", "GetDC", "ReleaseDC", "RegisterSoftwareDevice"}
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUT)
+    output = parser.parse_args().output
     source = (ROOT / "reference/dxvk/include/native/directx/d3d9.h").read_text(encoding="utf-8")
     methods = {}
     for interface in INTERFACES:
@@ -52,7 +56,7 @@ def main():
                 else:
                     special.append(f'case {slot}: name="{name}";break;')
                 continue
-            # Windows shared-resource HANDLEs and GDI cursor/DC services are not Android capabilities.
+            # Windows shared-resource HANDLEs and GDI cursor/DC services use the platform bridge.
             if name in {"CreateTexture", "CreateVolumeTexture", "CreateCubeTexture", "CreateVertexBuffer", "CreateIndexBuffer", "CreateRenderTarget", "CreateDepthStencilSurface", "CreateOffscreenPlainSurface"}:
                 call = f'create_resource(c,&{interface}::{name},"{name}")'
             else:
@@ -60,11 +64,11 @@ def main():
             dispatch.append(f"case {slot}: return {call};")
         dispatch.append("default: break;}break;")
         special.append("default: break;}break;")
-    OUT.mkdir(parents=True, exist_ok=True)
+    output.mkdir(parents=True, exist_ok=True)
     for name, value in [("guest_methods.inc", "\n".join(c)), ("bridge_metadata.inc", "\n".join(cpp)), ("bridge_dispatch.inc", "\n".join(dispatch)), ("bridge_special_names.inc", "\n".join(special))]:
-        path=OUT/name; data=(value+"\n").encode()
+        path=output/name; data=(value+"\n").encode()
         if not path.exists() or path.read_bytes()!=data:path.write_bytes(data)
-    (OUT/"bridge_slots.json").write_text(json.dumps({interface:[{'name':name,'result':result,'arguments':arguments}for result,name,arguments in items]for interface,items in methods.items()},indent=2)+"\n")
+    (output/"bridge_slots.json").write_text(json.dumps({interface:[{'name':name,'result':result,'arguments':arguments}for result,name,arguments in items]for interface,items in methods.items()},indent=2)+"\n")
     print("Generated",sum(len(items)for items in methods.values()),"typed D3D9 slots across",len(methods),"interfaces")
 
 if __name__ == "__main__":main()

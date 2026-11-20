@@ -110,7 +110,7 @@ def main():
     ndk = Path(os.environ.get('ANDROID_NDK_HOME', sdk / 'ndk/27.2.12479018'))
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     flags = ['--target=aarch64-linux-android29', '-O1', '-DRECOMP_X87_WINDOW', '-DRECOMP_TRACE',
-             '-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke', '-I' + str(generated)]
+             '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke', '-I' + str(generated)]
     own = []
     for number, source in enumerate([ROOT / 'tests/test_crt_memmove.c', *sorted(generated.glob('*.c'))]):
         obj = output / f'test-{number}.o'

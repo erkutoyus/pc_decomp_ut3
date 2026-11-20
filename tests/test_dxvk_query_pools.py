@@ -1,4 +1,4 @@
-"""HOST-run the query pool choice of android/dxvk/query_pools.inc against upstream DXVK's allocator.
+"""HOST-run the query pool choice of engine/dxvk/query_pools.inc against upstream DXVK's allocator.
 
 The plain C++17 part (namespace query_pools) is taken from the overlay as it is, compiled with MSVC and
 driven like DxvkGpuQueryAllocator: per-pool LIFO lists of handles, a new pool when none is free. A
@@ -153,7 +153,7 @@ def block(text, opening):
 class QueryPoolsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        source = (ROOT / "android/dxvk/query_pools.inc").read_text(encoding="utf-8")
+        source = (ROOT / "engine/dxvk/query_pools.inc").read_text(encoding="utf-8")
         OUT.mkdir(parents=True, exist_ok=True)
         (OUT / "probe.cpp").write_text(HARNESS.replace("/* ACTUAL */", block(source, "  namespace query_pools {")),
                                        encoding="utf-8")

@@ -10,10 +10,10 @@
  * EBX/ESI/EDI/EBP and guest memory. ECX, EDX, the flags and XMM are not part of the contract
  * (tools/volatile_liveness.py proves no caller reads them after these calls). */
 #include "host.h"
-#include "../android/host/core_native.c"
-#include "../android/host/collision_native.c"
-#include "../android/host/crt_native.c"
-#include "../android/host/particle_native.c"
+#include "../engine/host/core_native.c"
+#include "../engine/host/collision_native.c"
+#include "../engine/host/crt_native.c"
+#include "../engine/host/particle_native.c"
 #include <assert.h>
 #include <sys/mman.h>
 

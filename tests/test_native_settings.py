@@ -31,7 +31,7 @@ def original_route_contract():
     assert "AdjustSkin(true);SettingsList.SetFocus(none);" in midgame
     assert "Skin=bHudSkin?UISkin'UI_InGameHud.UTHUDSkin':UISkin(DynamicLoadObject(\"UI_Skin_Derived.UTDerivedSkin\",class'UISkin'));" in midgame
     assert "if(bActivate){AdvancedOptions();}" in midgame
-    source = (ROOT / "android/uscript/AndroidPort/Classes/AndroidPortViewportClient.uc").read_text()
+    source = (ROOT / "engine/uscript/AndroidPort/Classes/AndroidPortViewportClient.uc").read_text()
     route = source[source.index("function HandlePortMenuRequest"):source.index("function HandlePortStartupLogin")]
     route = re.sub(r"\s+", "", route)
     assert "MidGameMenu.TabControl.ActivatePage(MidGameSettings,0,true);" in route
@@ -53,7 +53,7 @@ def main():
     source = ROOT / "build/uscript-test-source/AndroidPortChecks"
     classes = source / "Classes"
     classes.mkdir(parents=True, exist_ok=True)
-    for path in (ROOT / "android/uscript/AndroidPort/Classes").glob("*.uc"):
+    for path in (ROOT / "engine/uscript/AndroidPort/Classes").glob("*.uc"):
         shutil.copyfile(path, classes / path.name)
     for path in (ROOT / "tests/uscript/AndroidPortChecks/Classes").glob("*.uc"):
         shutil.copyfile(path, classes / path.name)
@@ -65,7 +65,7 @@ def main():
     engine.write_text(engine.read_text(encoding="utf-8-sig") +
         "\n[Core.System]\nPaths=..\\UTGame\\Unpublished\\CookedPC\\Script\n" +
         "SeekFreePCPaths=..\\UTGame\\Unpublished\\CookedPC\\Script\n", encoding="utf-8")
-    options = (ROOT / "android/uscript/AndroidPort/AndroidPortOptions-RUS.ini").read_text(encoding="utf-8")
+    options = (ROOT / "engine/uscript/AndroidPort/AndroidPortOptions-RUS.ini").read_text(encoding="utf-8")
     caption = re.search(r"(?m)^LayoutCaption=(.+)$", options)[1].strip()
     game_config = work / "UTGame/Config/UTGame.ini"
     data = game_config.read_bytes()

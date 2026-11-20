@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.ut3.port.macos</string>
+    <key>CFBundleName</key>
+    <string>Unreal Tournament 3</string>
+    <key>CFBundleDisplayName</key>
+    <string>Unreal Tournament 3</string>
+    <key>CFBundleIconFile</key>
+    <string>UT3.icns</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>UT3VulkanSDKPath</key>
+    <string>${UT3_VULKAN_SDK_PLIST}</string>
+</dict>
+</plist>

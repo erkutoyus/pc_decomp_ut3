@@ -20,7 +20,7 @@ def main():
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     out = ROOT / 'build/game-native-tests'
     out.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / 'android/host/core.c').read_text(encoding='utf-8')
+    core = (ROOT / 'engine/host/core.c').read_text(encoding='utf-8')
     start = core.index('VOID_HIDDEN uint32_t g_eax')
     end = core.index('/* --------------------------------------------------------------- logging */')
     (out / 'context.c').write_text('#include "host.h"\n' + core[start:end], encoding='utf-8')
@@ -33,7 +33,7 @@ def main():
     (out / 'originals.c').write_text('#define RECOMP_GENERATED_CODE\n#include "host.h"\n' + '\n'.join(owners), encoding='utf-8')
     binary = out / 'test-game-native'
     command = [str(clang), '--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing', '-fwrapv',
-               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iandroid/runtime', '-Iandroid/host',
+               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iengine/runtime', '-Iengine/host', '-Iengine/host',
                str(ROOT / 'tests/test_game_native.c'), str(out / 'originals.c'), str(out / 'context.c'),
                '-o', str(binary), '-lm']
     subprocess.run(command, cwd=ROOT, check=True)

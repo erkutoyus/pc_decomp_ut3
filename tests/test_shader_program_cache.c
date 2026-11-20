@@ -1,6 +1,6 @@
 /* Cached production shader binds without a GL context: key changes, collision traversal and invalidation.
  * Build with tools/build_host_test.py, excluding android_main; glUseProgram is observed here. */
-#include "../android/host/d3d9_internal.h"
+#include "../engine/host/d3d9_internal.h"
 #include <assert.h>
 #include <unistd.h>
 
@@ -8,7 +8,7 @@ static unsigned use_calls;
 static GLuint used_program;
 static void cache_use_program(GLuint program) { ++use_calls; used_program = program; }
 #define glUseProgram cache_use_program
-#include "../android/host/d3d9_shader.c"
+#include "../engine/host/d3d9_shader.c"
 #undef glUseProgram
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

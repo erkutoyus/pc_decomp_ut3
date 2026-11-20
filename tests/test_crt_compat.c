@@ -1,5 +1,5 @@
 /* Execute the production exports, including their x86 stack cleanup. */
-#include "../android/host/crt_compat.c"
+#include "../engine/host/crt_compat.c"
 #include <assert.h>
 #include <sys/mman.h>
 

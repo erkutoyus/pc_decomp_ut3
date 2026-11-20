@@ -34,7 +34,7 @@ static void original(void){++calls;g_eax=1;g_esp+=12;}
 static void_fn void_dispatch_find(uint32_t address){assert(address==0x120A900);return missing?NULL:original;}
 static void void_dispatch_add(uint32_t address,void_fn fn){assert(address==0x120A900&&fn);writer=fn;++installed;}
 static void void_log(const char *format,...){(void)format;}
-#include "../../android/host/profiles.c"
+#include "../../engine/host/profiles.c"
 int main(void){
     memory=calloc(1,0x2000000);assert(memory);
     assert(!void_profiles_init()&&!installed&&!profile_write_original);

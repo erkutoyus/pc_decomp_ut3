@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../android/host/d3d9_internal.h"
+#include "../engine/host/d3d9_internal.h"
 static unsigned array_buffer_binds;
 static void count_bind_buffer(GLenum target, GLuint buffer)
 {
@@ -17,7 +17,7 @@ static void count_bind_buffer(GLenum target, GLuint buffer)
     glBindBuffer(target, buffer);
 }
 #define glBindBuffer count_bind_buffer
-#include "../android/host/d3d9_gl.c"
+#include "../engine/host/d3d9_gl.c"
 #undef glBindBuffer
 
 /* A scratch -finstrument-functions build checks the skipped work without production hooks. */

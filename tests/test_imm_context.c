@@ -1,6 +1,6 @@
 /* Production IME absence with real virtual-window lifetime and guest ABI. */
-#include "../android/host/user32.c"
-#include "../android/host/imm32.c"
+#include "../engine/host/user32.c"
+#include "../engine/host/imm32.c"
 #include <assert.h>
 #include <unistd.h>
 

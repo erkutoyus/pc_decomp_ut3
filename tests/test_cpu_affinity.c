@@ -1,5 +1,5 @@
 /* Production virtual affinity model, CPUID identity and physical-policy separation. */
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

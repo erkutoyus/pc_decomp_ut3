@@ -1,5 +1,5 @@
 /* Exact upload ranges/calls against the previous scanner; optional CPU-only scanner benchmark. */
-#include "../android/host/d3d9_internal.h"
+#include "../engine/host/d3d9_internal.h"
 #include <assert.h>
 #include <time.h>
 #include <unistd.h>
@@ -46,7 +46,7 @@ static void observed_uniform(GLint location, GLsizei count, const GLfloat *value
 
 #define glGetUniformLocation observed_location
 #define glUniform4fv observed_uniform
-#include "../android/host/d3d9_shader.c"
+#include "../engine/host/d3d9_shader.c"
 #undef glUniform4fv
 #undef glGetUniformLocation
 

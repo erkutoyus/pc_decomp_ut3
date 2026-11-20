@@ -44,7 +44,7 @@ static int void_vm_writable(uint32_t p,uint32_t n){return void_vm_readable(p,n);
 static int void_vm_protect(uint32_t p,uint32_t n,uint32_t mode,uint32_t *old){assert(void_vm_readable(p,n));*old=mode==4?2:4;++protections;return 1;}
 static void void_log(const char *format,...){(void)format;}
 static void void_lift_trap(uint32_t address,const char *reason){assert(address==0x01243A50);assert(reason);longjmp(trap,1);}
-#include "../../android/host/openspy.c"
+#include "../../engine/host/openspy.c"
 int main(int argc,char **argv){
     assert(argc==2);memory=calloc(1,0x2400000);assert(memory);
     FILE *f=fopen(argv[1],"rb");assert(f);assert(fread(memory+0x400000,1,0x2000000,f)>0);fclose(f);

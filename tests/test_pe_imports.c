@@ -1,5 +1,5 @@
 /* Include the production PE binder so malformed descriptors exercise its actual checks. */
-#include "../android/host/pe.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach)

@@ -1,5 +1,5 @@
 /* Real guest stdcall and explicit unavailable-service semantics. */
-#include "../android/host/hooks.c"
+#include "../engine/host/hooks.c"
 #include <assert.h>
 #include <unistd.h>
 

@@ -1,4 +1,4 @@
-/* On-device check of the port's HLSL compiler (android/host/hlsl_vkd3d.c, vkd3d-shader) against the
+/* On-device check of the port's HLSL compiler (engine/host/hlsl_vkd3d.c, vkd3d-shader) against the
  * game's own: every recorded D3DXCompileShader request of a folder is compiled on the phone and
  * compared with the bytecode d3dx9_35.dll made from the same request on Windows (same key):
  * success, the constant table's names/register sets/sizes (UE3 binds parameters through it) and
@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "../android/host/hlsl_vkd3d.c"
+#include "../engine/host/hlsl_vkd3d.c"
 #include "mojoshader.h"
 
 typedef struct { char name[128]; unsigned set, count; } constant;

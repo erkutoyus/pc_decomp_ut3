@@ -1,5 +1,5 @@
 /* Production BSTR exports by name and ordinal, using the actual guest heap. */
-#include "../android/host/bstr.c"
+#include "../engine/host/bstr.c"
 #include <assert.h>
 #include <unistd.h>
 

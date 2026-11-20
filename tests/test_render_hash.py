@@ -20,7 +20,7 @@ def main():
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     out = ROOT / 'build/render-hash-test'
     out.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / 'android/host/core.c').read_text(encoding='utf-8')
+    core = (ROOT / 'engine/host/core.c').read_text(encoding='utf-8')
     context = out / 'context.c'
     context.write_text('#include "host.h"\n' + core[core.index('VOID_HIDDEN uint32_t g_eax'):core.index('void void_regs_save')], encoding='utf-8')
     bodies = []
@@ -36,7 +36,7 @@ def main():
     original.write_text('#define RECOMP_GENERATED_CODE\n#include "host.h"\n' + '\n'.join(bodies), encoding='utf-8')
     binary = out / 'test-render-hash'
     command = [str(clang), '--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing', '-fwrapv',
-               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iandroid/runtime', '-Iandroid/host',
+               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iengine/runtime', '-Iengine/host', '-Iengine/host',
                str(context), str(original), str(ROOT / 'tests/test_render_hash.c'), '-o', str(binary), '-lm']
     subprocess.run(command, cwd=ROOT, check=True)
     if args.build_only:

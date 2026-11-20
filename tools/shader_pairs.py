@@ -1,4 +1,4 @@
-"""Regenerate android/host/shader_pairs.c (the GLES renderer's shipped prelink manifest) from one or
+"""Regenerate engine/host/shader_pairs.c (the GLES renderer's shipped prelink manifest) from one or
 more userdata/ShaderCache/pairs.txt files recorded on devices. A line: vertex bytecode hash, pixel
 bytecode hash (FNV-1a 64, hex), D3DCOLOR input mask (hex), alpha-test variant (decimal). Hashes only."""
 import argparse
@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "android/host/shader_pairs.c"
+OUT = ROOT / "engine/host/shader_pairs.c"
 LINE = re.compile(r"^([0-9a-f]{16}) ([0-9a-f]{16}) ([0-9a-f]{1,4}) (\d{1,2})$")
 
 

@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 
+
 ROOT = Path(__file__).resolve().parents[1]
 ORIGINALS = ['004B49A0', '00B65BD0', '004B9D60', '00F78830', '00E2DC90', '00BC1310', '00BC12C0', '0116C250', '00BF8DA0',
              '00EC2580', '00EC2610', '00EC26A0', '00EC2730']
@@ -38,16 +39,16 @@ def main():
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     out = ROOT / 'build/contract-native-tests'
     out.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / 'android/host/core.c').read_text(encoding='utf-8')
+    core = (ROOT / 'engine/host/core.c').read_text(encoding='utf-8')
     start = core.index('VOID_HIDDEN uint32_t g_eax')
     end = core.index('/* --------------------------------------------------------------- logging */')
     (out / 'context.c').write_text('#include "host.h"\n' + core[start:end], encoding='utf-8')
     (out / 'originals.c').write_text('#define RECOMP_GENERATED_CODE\n#include "host.h"\nvoid sub_00B55380(void);\n' +
                                      '\n'.join(original(a) for a in ORIGINALS), encoding='utf-8')
     sys.path.insert(0, str(ROOT / 'tools'))
-    from build_android import DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, WRAPS, host_overrides, validate_native_call_contract
+    from lift_build import host_sources, DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, WRAPS, host_overrides, validate_native_call_contract
     from protocol_transform import Protocol, apply_protocol
-    full = (set(WRAPS) | host_overrides(sorted((ROOT / 'android/host').glob('*.c')))) - NATIVE_CALL_CONTRACT
+    full = (set(WRAPS) | host_overrides(sorted(host_sources()))) - NATIVE_CALL_CONTRACT
     protocol = Protocol(DEFAULT_CALL_PROTOCOL, full=full, masked_native=NATIVE_CALL_CONTRACT)
     validate_native_call_contract(protocol)
     masked = '\n'.join(original(a, '') for a in SHADERS)
@@ -72,7 +73,7 @@ void shader_masked_call(recomp_func_t target, const uint32_t *input, uint32_t *o
 ''' + masked, encoding='utf-8')
     binary = out / 'test-contract-native'
     command = [str(clang), '--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing', '-fwrapv',
-               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iandroid/runtime', '-Iandroid/host',
+               '-ffp-contract=off', '-fno-math-errno', '-DRECOMP_X87_WINDOW', '-Iengine/runtime', '-Iengine/host', '-Iengine/host',
                '-Wl,-z,max-page-size=16384', str(ROOT / 'tests/test_contract_native.c'), str(out / 'originals.c'),
                str(out / 'masked.c'), str(out / 'context.c'), '-o', str(binary), '-lm']
     subprocess.run(command, cwd=ROOT, check=True)

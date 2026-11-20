@@ -58,7 +58,7 @@ def main():
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     obj = output / "test.o"
     subprocess.run([str(clang), '--target=aarch64-linux-android29', '-O1', '-DRECOMP_X87_WINDOW',
-                    '-DRECOMP_TRACE', '-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke',
+                    '-DRECOMP_TRACE', '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke',
                     '-c', 'tests/test_argv.c', '-o', str(obj)], cwd=ROOT, check=True)
     objects = (ROOT / 'build/host-smoke/test-pe-imports.rsp').read_text().splitlines()
     objects[0] = '"' + obj.as_posix() + '"'

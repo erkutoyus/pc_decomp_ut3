@@ -25,7 +25,7 @@ def main():
     ndk = Path(os.environ.get("ANDROID_NDK_HOME", sdk / "ndk/27.2.12479018"))
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     OUT.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / "android/host/core.c").read_text()
+    core = (ROOT / "engine/host/core.c").read_text()
     context = OUT / "context.c"
     context.write_text('#include "host.h"\n' + core[core.index("VOID_HIDDEN uint32_t g_eax"):
         core.index("/* --------------------------------------------------------------- logging */")])
@@ -44,7 +44,7 @@ def main():
     binary = OUT / "test-ai-trace-native"
     sources = [context, oracle, ROOT / "tests/test_ai_trace_native.c"]
     command = [str(clang), "--target=aarch64-linux-android29", "-O2", "-fno-strict-aliasing", "-fwrapv",
-        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iandroid/runtime", "-Iandroid/host",
+        "-ffp-contract=off", "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iengine/runtime", "-Iengine/host", "-Iengine/host",
         *map(str, sources), "-o", str(binary), "-lm"]
     built = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     (OUT / "build.log").write_text(built.stdout + built.stderr)
@@ -61,7 +61,7 @@ def main():
             print(ran.stdout + ran.stderr, end="")
         finally:
             subprocess.run([*adb, "shell", "rm", "-f", remote], capture_output=True)
-    files = [*sources, ROOT / "android/host/ai_trace_native.c", ROOT / "android/runtime/recomp_types.h",
+    files = [*sources, ROOT / "engine/host/ai_trace_native.c", ROOT / "engine/runtime/recomp_types.h",
         ROOT / "tools/x87_slots.py", Path(__file__), binary]
     receipt = {"status": "BUILT_NOT_RUN" if result is None else "PASS" if result["returncode"] == 0 and
         "PASS native AI trace:" in result["stdout"] else "FAIL", "device": args.serial, "command": command,

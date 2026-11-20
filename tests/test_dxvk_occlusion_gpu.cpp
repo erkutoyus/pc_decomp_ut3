@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <thread>
 #include <vector>
-#include "../android/dxvk/turnip.inc"
+#include "../engine/dxvk/legacy_turnip.inc"
 #ifndef UT3_ORACLE_CYCLES
 #define UT3_ORACLE_CYCLES 2
 #endif

@@ -1,4 +1,4 @@
-# Publication allowlist: only what builds the APK from the original game files is tracked.
+# Publication allowlist for the Apple port and preserved shared/reference sources.
 # Local files, build outputs, research notes and new top-level folders stay private.
 /*
 !/.gitignore
@@ -15,29 +15,59 @@
 !/dependencies-turnip.json
 !/dependencies-textures.json
 !/dependencies-vkd3d.json
+!/CMakeLists.txt
+!/BUILDING.md
+!/build_macos.sh
+!/build_ios.sh
 
-!/android/
-/android/**
-!/android/**/
-!/android/**/*.c
-!/android/**/*.h
-!/android/**/*.cpp
-!/android/**/*.inc
-!/android/**/*.java
-!/android/**/*.xml
-!/android/**/*.uc
-!/android/**/*.ini
-!/android/**/*.json
-!/android/**/*.py
-!/android/**/*.md
-!/android/**/*.yml
-!/android/**/*.comp
-!/android/launcher/.gitignore
+!/engine/
+/engine/**
+!/engine/**/
+!/engine/**/*.c
+!/engine/**/*.cpp
+!/engine/**/*.h
+!/engine/**/*.inc
+!/engine/**/*.json
+!/engine/**/*.uc
+!/engine/**/*.ini
+
+!/platform/
+/platform/*
+!/platform/apple/
+/platform/apple/*
+!/platform/apple/*.c
+!/platform/apple/*.cpp
+!/platform/apple/*.m
+!/platform/apple/*.mm
+!/platform/apple/*.h
+!/platform/apple/Info.plist.in
+!/platform/apple/ios/
+!/platform/apple/ios/*.m
+!/platform/apple/ios/*.mm
+!/platform/apple/ios/*.h
+!/platform/apple/ios/*.inc
+!/platform/apple/ios/CMakeLists.txt
+!/platform/apple/ios/Info.plist.in
+!/platform/apple/ios/probe/
+!/platform/apple/ios/probe/CMakeLists.txt
+!/platform/apple/ios/probe/Info.plist
+!/platform/apple/ios/probe/*.m
+
+!/icons/
+/icons/*
+!/icons/AppIcon1024.png
+
+!/docs/
+/docs/*
+!/docs/apple/
+/docs/apple/*
+!/docs/apple/*.md
 
 !/config/
 /config/*
 !/config/inputs.json
 !/config/modules.json
+!/config/apple-dependencies.json
 !/config/warm-functions.txt
 
 !/tools/
@@ -51,6 +81,8 @@
 !/tests/*.c
 !/tests/*.h
 !/tests/*.cpp
+!/tests/*.m
+!/tests/*.mm
 !/tests/*.inc
 !/tests/*.hlsl
 !/tests/*.py
@@ -108,6 +140,7 @@
 *.key
 .env
 .env.*
+**/cdkey.txt
 local.properties
 STATE.md
 AGENTS.md

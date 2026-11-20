@@ -1,10 +1,10 @@
-"""Write android/host/d3d9_thread_check.inc: every GL/EGL function the D3D9 files call,
+"""Write engine/host/d3d9_thread_check.inc: every GL/EGL function the D3D9 files call,
 wrapped to check first that it runs on the render thread (built with --rt-check)."""
 from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-HOST = ROOT / "android/host"
+HOST = ROOT / "engine/host"
 SOURCES = ["d3d9_gl.c", "d3d9_resource.c", "d3d9_shader.c", "d3d9_ff.c", "d3d9_device.c"]
 ANY_THREAD = {"eglGetProcAddress"}
 

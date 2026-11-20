@@ -67,7 +67,7 @@ def reader(regions):
 
 
 def c_probe():
-    source = (ROOT / "android/host/eh.c").read_text()
+    source = (ROOT / "engine/host/eh.c").read_text()
     function = source[source.index("static uint32_t frame_operand_end("):source.index("/* Run guest code")]
     arrays, tests = [], []
     for index, (name, regions, expected) in enumerate(vectors()):

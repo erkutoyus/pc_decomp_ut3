@@ -1,5 +1,5 @@
 /* Production COM mode enumeration -> fullscreen PP -> real GLES backbuffer. */
-#include "../android/host/d3d9_device.c"
+#include "../engine/host/d3d9_device.c"
 #include <assert.h>
 #include <unistd.h>
 

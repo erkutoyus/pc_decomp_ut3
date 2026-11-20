@@ -50,7 +50,7 @@ def main():
     log = result.stdout+result.stderr
     (out/'device.log').write_text(log, encoding='utf-8')
     passed = result.returncode == 0 and 'PASS 180 GPU' in log and 'PASS original retail terrain' in log
-    inputs = [source, ROOT/'tests/test_shader_constant_arrays.c', ROOT/'android/host/d3d9_shader.c', binary, *files]
+    inputs = [source, ROOT/'tests/test_shader_constant_arrays.c', ROOT/'engine/host/d3d9_shader.c', binary, *files]
     receipt = {'serial': args.serial, 'returncode': result.returncode, 'result': 'PASS' if passed else 'FAIL',
                'inputs': {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}}
     (out/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8')

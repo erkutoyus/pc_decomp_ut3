@@ -16,7 +16,7 @@ CALLS = "00402780 004050E0 00405190 004055A0 00486030 005DAF50 00B4F1F0 00B55380
 
 def prepare():
     OUT.mkdir(parents=True, exist_ok=True)
-    core = (ROOT / "android/host/core.c").read_text()
+    core = (ROOT / "engine/host/core.c").read_text()
     context = OUT / "context.c"
     context.write_text('#include "host.h"\n' + core[core.index("VOID_HIDDEN uint32_t g_eax"):
         core.index("/* --------------------------------------------------------------- logging */")])
@@ -44,12 +44,12 @@ def prepare():
 def host_build(sources):
     directory = OUT / "host"
     (directory / "sys").mkdir(parents=True, exist_ok=True)
-    runtime = (ROOT / "android/runtime/recomp_types.h").read_text().replace(
+    runtime = (ROOT / "engine/runtime/recomp_types.h").read_text().replace(
         '#error "This header is the ARM64 runtime model; x86 builds use native/recomp_types.h"', "")
     runtime = re.sub(r"static inline uint64_t __rdtsc\(void\) \{.*?\n\}",
         "static inline uint64_t fixture_rdtsc(void) { return 0; }", runtime, flags=re.S)
     (directory / "recomp_types.h").write_text(runtime)
-    host = (ROOT / "android/host/host.h").read_text()
+    host = (ROOT / "engine/host/host.h").read_text()
     registers = host[host.index("typedef struct void_regs {"):host.index("} void_regs;") + len("} void_regs;")]
     (directory / "host.h").write_text('#ifndef VOID_HOST_H\n#define VOID_HOST_H\n#include "recomp_types.h"\n'
         '#include <stdarg.h>\n' + registers + '\nextern recomp_ehframe_t *g_eh_frames; extern uint32_t g_eh_obj,g_eh_info;\n'
@@ -100,9 +100,9 @@ def main():
         binary, env = OUT / "test-render-visibility-native", None
         common = ["--target=aarch64-linux-android29", "-O2", "-fno-strict-aliasing", "-fwrapv",
             "-fvisibility=hidden", "-fPIC", "-ffp-contract=off", "-fno-math-errno", "-g0",
-            "-DRECOMP_X87_WINDOW", "-DUT3_ANDROID_APP", "-Iandroid/runtime", "-Iandroid/host"]
+            "-DRECOMP_X87_WINDOW", "-DUT3_ANDROID_APP", "-Iengine/runtime", "-Iengine/host", "-Iengine/host"]
         separated = ["-DRECOMP_GENERATED_CODE", "-DRECOMP_GUEST_STATE_SEPARATE",
-            "-mllvm", "-basic-aa-separate-storage", "-include", str(ROOT / "android/runtime/guest_state_prefix.h")]
+            "-mllvm", "-basic-aa-separate-storage", "-include", str(ROOT / "engine/runtime/guest_state_prefix.h")]
         commands, objects = [], []
         for source in sources:
             obj = OUT / (source.stem + ".o")
@@ -120,8 +120,8 @@ def main():
         log.append(built.stdout + built.stderr)
         (binary.parent / "build.log").write_text("\n".join(log))
         assert built.returncode == 0, log[-1]
-    files = [*sources, ROOT / "android/host/render_visibility_native.c", ROOT / "android/runtime/recomp_types.h",
-        ROOT / "android/runtime/guest_state_prefix.h", ROOT / "android/host/core.c", ROOT / "android/host/host.h",
+    files = [*sources, ROOT / "engine/host/render_visibility_native.c", ROOT / "engine/runtime/recomp_types.h",
+        ROOT / "engine/runtime/guest_state_prefix.h", ROOT / "engine/host/core.c", ROOT / "engine/host/host.h",
         ROOT / "tools/x87_slots.py", Path(__file__), binary]
     receipt = {"status": "BUILT", "target": "host-x64" if args.host else "android-arm64", "commands": commands,
         "oracle": "Unmodified lifted F01CF0, sparse iterator and bit-reference helpers; other engine boundaries mocked.",

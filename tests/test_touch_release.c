@@ -7,7 +7,7 @@
 #ifdef _WIN32
 #include "touch_host_win.h"
 #endif
-#include "../android/host/input.c"
+#include "../engine/host/input.c"
 
 enum { KEYDOWN=0x100, KEYUP=0x101, ESCAPE=27, SPACE=32, PAUSE_BIT=1u<<7, JUMP_BIT=1u<<2, TAUNT_BIT=1u<<26 };
 typedef struct { uint32_t message,value; } posted_t;

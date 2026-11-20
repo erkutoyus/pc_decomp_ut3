@@ -1,7 +1,7 @@
 /* Execute actual UE3 compressed blocks in the production lifted LZO owner. */
 #include "host.h"
 #include "functions.h"
-#include "../android/host/pe.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

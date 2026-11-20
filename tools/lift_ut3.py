@@ -230,12 +230,19 @@ def regenerate_function(spec, address, source_root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--game-root", type=Path, help="Local root of the pinned Steam installation")
+    parser.add_argument("--vc80-root", type=Path, help="Directory containing the two pinned x86 VC80 DLLs")
     parser.add_argument("--module", action="append", help="Module name from config/modules.json")
     parser.add_argument("--function", action="append", type=lambda a: int(a, 0),
                         help="Regenerate an existing VA; requires exactly one --module")
     args = parser.parse_args()
     inputs = json.loads((ROOT / "config/inputs.json").read_text())
     specs = json.loads((ROOT / "config/modules.json").read_text())["modules"]
+    source_root = args.game_root or Path(inputs["source_root"])
+    if args.vc80_root is not None:
+        for spec in specs:
+            if spec["name"] in ("msvcr80", "msvcp80"):
+                spec["source"] = str(args.vc80_root / spec["file"])
     known = {m["name"] for m in specs}
     if args.module and set(args.module) - known:
         parser.error("Unknown module: " + ", ".join(sorted(set(args.module) - known)))
@@ -244,7 +251,7 @@ def main():
             parser.error("--function requires exactly one --module")
         spec = next(m for m in specs if m["name"] == args.module[0])
         for address in args.function:
-            regenerate_function(spec, address, Path(inputs["source_root"]))
+            regenerate_function(spec, address, source_root)
         return
     for spec in specs:
         if args.module and spec["name"] not in args.module:
@@ -252,7 +259,7 @@ def main():
         directory = ROOT / "generated" / spec["name"]
         directory.mkdir(parents=True, exist_ok=True)
         write_json(directory / "report.json", {"status": "GENERATING"})
-        binary, image_hash = prepare(spec, Path(inputs["source_root"]))
+        binary, image_hash = prepare(spec, source_root)
         pe = pefile.PE(str(binary))
         roots = metadata_roots(pe)
         catalog = ROOT / "config" / f'{spec["name"]}.functions.json'

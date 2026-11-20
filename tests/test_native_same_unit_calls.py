@@ -7,8 +7,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-from build_android import UE3_NATIVE_TARGETS, WRAPS, native_same_unit_calls
-from tests.host_environment import CLANG, environment
+from lift_build import UE3_NATIVE_TARGETS, WRAPS, native_same_unit_calls
+if sys.platform == "win32":
+    from tests.host_environment import CLANG, environment
 
 
 class NativeSameUnitCallsTest(unittest.TestCase):
@@ -47,11 +48,16 @@ int main(void) {{
     }}
     value = calls = 0;
 ''' + ''.join(name + '();\n' for name in UE3_NATIVE_TARGETS) + f'assert(value == {total} && !calls); return 0; }}\n'
-        env, linker = environment('x64')
         with tempfile.TemporaryDirectory() as folder:
             folder = Path(folder)
             path = folder / 'check.c'
             path.write_text(program, encoding='ascii')
+            if sys.platform != 'win32':
+                executable=folder/'check'
+                subprocess.run(['cc','-O2','-std=c11',str(path),'-o',str(executable)],check=True)
+                subprocess.run([str(executable)],check=True)
+                return
+            env, linker = environment('x64')
             for command in ([CLANG, '/nologo', '/O2', '/std:c11', '/c', path, '/Fo' + str(folder / 'check.obj')],
                             [linker, '/nologo', folder / 'check.obj', '/OUT:' + str(folder / 'check.exe')],
                             [folder / 'check.exe']):

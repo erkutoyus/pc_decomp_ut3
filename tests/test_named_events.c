@@ -1,5 +1,5 @@
 /* Production process-local A/W event namespace and per-handle rights. */
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }
@@ -16,7 +16,7 @@ static uint32_t text(const char *name, int wide)
     if (wide) void_utf8_to_gw(name, out, units); else void_utf8_to_ga(name, out, units);
     return out;
 }
-static uint32_t wait(uint32_t event) { uint32_t args[] = {event,0}; return api("WaitForSingleObject",2,args); }
+static uint32_t wait_event(uint32_t event) { uint32_t args[] = {event,0}; return api("WaitForSingleObject",2,args); }
 
 int main(void)
 {
@@ -29,17 +29,17 @@ int main(void)
     create[1] = 0; create[2] = 1; create[3] = w;
     uint32_t duplicate = api("CreateEventW",4,create); assert(duplicate && duplicate != first && void_get_last_error() == 183);
     assert(void_handle_get(first,VOID_OBJ_EVENT) == void_handle_get(duplicate,VOID_OBJ_EVENT));
-    assert(wait(duplicate) == WAIT_TIMEOUT_); /* Existing initial/manual state wins. */
+    assert(wait_event(duplicate) == WAIT_TIMEOUT_); /* Existing initial/manual state wins. */
     open[2] = w; open[1] = 1;
     void_set_last_error(0x1234);
     uint32_t observer = api("OpenEventW",3,open); assert(observer && void_get_last_error() == 0x1234);
     assert(!api("SetEvent",1,&observer) && void_get_last_error() == 5);
-    assert(api("SetEvent",1,&first) && wait(observer) == 0 && wait(observer) == 0);
-    assert(api("ResetEvent",1,&duplicate) && wait(observer) == WAIT_TIMEOUT_);
+    assert(api("SetEvent",1,&first) && wait_event(observer) == 0 && wait_event(observer) == 0);
+    assert(api("ResetEvent",1,&duplicate) && wait_event(observer) == WAIT_TIMEOUT_);
     open[0] = 2;
     uint32_t modifier = api("OpenEventW",3,open); assert(modifier);
-    assert(wait(modifier) == WAIT_FAILED_ && void_get_last_error() == 5);
-    assert(api("SetEvent",1,&modifier) && wait(observer) == 0);
+    assert(wait_event(modifier) == WAIT_FAILED_ && void_get_last_error() == 5);
+    assert(api("SetEvent",1,&modifier) && wait_event(observer) == 0);
     uint32_t copied = void_handle_dup(observer);
     assert(copied && !api("ResetEvent",1,&copied) && void_get_last_error() == 5);
     assert(api("CloseHandle",1,&copied));
@@ -48,7 +48,7 @@ int main(void)
     open[2] = a; open[0] = 0x4000;
     assert(!api("OpenEventA",3,open) && void_get_last_error() == 5);
     assert(api("CloseHandle",1,&first) && api("CloseHandle",1,&duplicate));
-    assert(wait(observer) == 0); /* Namespace/object survives original creator. */
+    assert(wait_event(observer) == 0); /* Namespace/object survives original creator. */
     assert(api("CloseHandle",1,&modifier) && api("CloseHandle",1,&observer));
     open[0] = 0x100000;
     assert(!api("OpenEventA",3,open) && void_get_last_error() == 2 && !named_events);

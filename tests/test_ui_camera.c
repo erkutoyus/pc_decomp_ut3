@@ -5,7 +5,7 @@
 #include <setjmp.h>
 #define RECOMP_RETADDR 0xDEAD0000u
 int void_machine_is_owned(void);
-#include "../android/host/ui_camera.c"
+#include "../engine/host/ui_camera.c"
 
 enum { TEST_SIZE=0x01000000, STACK=0x20008, MATRIX=STACK+0x188, CALLER=STACK+0x1E0, PLAYER=0x567800 };
 static int owned=1,calls,reads,expected_entered,view_calls,direct,scope_case;

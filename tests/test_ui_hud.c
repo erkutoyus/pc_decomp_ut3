@@ -5,7 +5,7 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include "ui_hud_core.inc"
-#include "../android/host/ui_hud.c"
+#include "../engine/host/ui_hud.c"
 
 enum { HUD_TEST_SIZE=0x02000000, ROOT_CLASS=0x120000, CLASS_KIND=0x121000,
        FUNCTION_KIND=0x122000,FLOAT_KIND=0x123000,OBJECT_KIND=0x124000,STRUCT_KIND=0x125000,

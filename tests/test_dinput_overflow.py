@@ -15,8 +15,8 @@ OUT = ROOT / 'build/dinput-overflow-test'
 class DInputOverflowTest(unittest.TestCase):
     def test_real_producers_and_reader(self):
         OUT.mkdir(parents=True, exist_ok=True)
-        source = (ROOT / 'android/host/dinput8.c').read_text()
-        com = (ROOT / 'android/host/com.h').read_text()
+        source = (ROOT / 'engine/host/dinput8.c').read_text()
+        com = (ROOT / 'engine/host/com.h').read_text()
         structure = re.search(r'typedef struct \{\s*void_com_object com;\s*int kind;.*?\} device_t;', source, re.S)[0]
         base = com[com.index('typedef struct void_com_object {'):com.index('} void_com_object;') + len('} void_com_object;')]
         begin = source.index('COM_METHOD(dev, GetDeviceData, 5)')
@@ -61,11 +61,11 @@ static void *void_com_host(uint32_t value){assert(value==1);return &di_fixture;}
         llvm = Path(os.environ.get('ANDROID_SDK_ROOT', Path.home() / 'AppData/Local/Android/Sdk')) / 'ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
         arm = OUT / 'test-dinput-overflow'
         run([str(llvm), '--target=aarch64-linux-android29', '-O2', '-std=gnu11', '-Wall', '-Wextra', '-Werror',
-             '-fno-strict-aliasing', '-fwrapv', '-DRECOMP_X87_WINDOW', '-I' + str(OUT), '-Iandroid/runtime', '-Iandroid/host', '-Igenerated', str(test), '-o', str(arm), '-lm'])
+             '-fno-strict-aliasing', '-fwrapv', '-DRECOMP_X87_WINDOW', '-I' + str(OUT), '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Igenerated', str(test), '-o', str(arm), '-lm'])
         for name in ('input.c', 'dinput8.c'):
             run([str(llvm), '--target=aarch64-linux-android29', '-O2', '-std=gnu11', '-Wall', '-Wextra', '-Werror',
-                 '-fno-strict-aliasing', '-fwrapv', '-DRECOMP_X87_WINDOW', '-DUT3_ANDROID_APP', '-Iandroid/runtime', '-Iandroid/host', '-Igenerated',
-                 '-c', str(ROOT / 'android/host' / name), '-o', str(OUT / (name + '.o'))])
+                 '-fno-strict-aliasing', '-fwrapv', '-DRECOMP_X87_WINDOW', '-DUT3_ANDROID_APP', '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Igenerated',
+                 '-c', str(ROOT / 'engine/host' / name), '-o', str(OUT / (name + '.o'))])
         java = Path(os.environ.get('JAVA_HOME', 'C:/Portable/jdk-24.0.1'))
         regressions = [ROOT / 'tests' / ('test_touch_' + name + '.c') for name in ('native', 'ui', 'text')]
         for regression in regressions:
@@ -79,11 +79,11 @@ static void *void_com_host(uint32_t value){assert(value==1);return &di_fixture;}
             print(run([str(exe)], env).strip())
             run([str(llvm), '--target=aarch64-linux-android29', '-O2', '-std=gnu11', '-Wall', '-Wextra', '-Werror',
                  '-Wno-unused-function', '-fno-strict-aliasing', '-fwrapv', '-DRECOMP_X87_WINDOW',
-                 '-Iandroid/runtime', '-Iandroid/host', '-Igenerated', str(regression), '-o', str(OUT / regression.stem), '-lm'])
+                 '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Igenerated', str(regression), '-o', str(OUT / regression.stem), '-lm'])
         (OUT / 'host.log').write_text('\n'.join(logs), encoding='utf-8')
         sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
         paths = [test, Path(__file__), ROOT / 'tests/host_environment.py', ROOT / 'tests/touch_host_win.h', *regressions,
-                 ROOT / 'android/host/input.c', ROOT / 'android/host/dinput8.c', ROOT / 'android/host/input.h', ROOT / 'android/host/com.h', OUT / 'dinput_overflow_reader.h']
+                 ROOT / 'engine/host/input.c', ROOT / 'engine/host/dinput8.c', ROOT / 'engine/host/input.h', ROOT / 'engine/host/com.h', OUT / 'dinput_overflow_reader.h']
         report = {'status': 'HOST_PASS_ARM64_FIXTURE_AND_BOTH_PRODUCTION_FILES_COMPILED_DEVICE_PENDING',
                   'commands': commands, 'source_sha256': {str(p.relative_to(ROOT)): sha(p) for p in paths},
                   'android_binary_sha256': sha(arm), 'host_log_sha256': sha(OUT / 'host.log'),

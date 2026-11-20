@@ -1,5 +1,5 @@
 /* Android self-check of production package parsing, codecs and cache writing. */
-#include "../android/texconv/ut3tex.cpp"
+#include "../engine/textures/ut3tex.cpp"
 #include <cassert>
 #include <signal.h>
 #include <sys/wait.h>

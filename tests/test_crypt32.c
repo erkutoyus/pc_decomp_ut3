@@ -1,6 +1,6 @@
 /* Synthetic callback oracle for the production Win32 boundary. No license
  * data or cipher implementation is used by this fixture. */
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #include <assert.h>
 
 typedef struct { void *pointer; size_t bytes; int wipe; } allocation;
@@ -49,7 +49,7 @@ static void fixture_end(void)
 #define void_heap_alloc fixture_heap_alloc
 #define void_blocking_begin fixture_begin
 #define void_blocking_end fixture_end
-#include "../android/host/crypt32.c"
+#include "../engine/host/crypt32.c"
 #undef malloc
 #undef free
 #undef void_heap_alloc

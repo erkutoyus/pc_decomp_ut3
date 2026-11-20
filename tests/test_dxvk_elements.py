@@ -15,7 +15,7 @@ sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 class ElementsTest(unittest.TestCase):
     def test_production_boundary_and_metadata(self):
         OUT.mkdir(parents=True,exist_ok=True)
-        source=(ROOT/'android/dxvk/bridge.cpp').read_text()
+        source=(ROOT/'engine/dxvk/bridge.cpp').read_text()
         before=(OUT/'before/bridge.cpp').read_text()
         reference=(ROOT/'tests/dxvk_elements_reference.inc').read_text()
         def elements(text):return text[text.index('size_t elements('):text.index('template<class T,class=void>struct IsInterface:')]
@@ -67,10 +67,10 @@ class ElementsTest(unittest.TestCase):
                  '-Wno-extern-c-compat','-Wno-missing-field-initializers']
         for path in ['reference/dxvk/include/native/windows','reference/dxvk/include/native/directx','reference/dxvk/include/vulkan/include','build/dxvk']:
             command+=['-I',str(ROOT/path)]
-        command+=['-c',str(ROOT/'android/dxvk/bridge.cpp'),'-o',str(OUT/'bridge-strict.o')]
+        command+=['-c',str(ROOT/'engine/dxvk/bridge.cpp'),'-o',str(OUT/'bridge-strict.o')]
         result=subprocess.run(command,cwd=ROOT,capture_output=True,timeout=60)
         self.assertEqual(result.returncode,0,(result.stdout+result.stderr).decode(errors='replace'));commands.append(command)
-        pins=['android/dxvk/bridge.cpp','tests/test_dxvk_elements.cpp','tests/test_dxvk_elements.py','tests/dxvk_elements_reference.inc',
+        pins=['engine/dxvk/bridge.cpp','tests/test_dxvk_elements.cpp','tests/test_dxvk_elements.py','tests/dxvk_elements_reference.inc',
               'build/dxvk/bridge_metadata.inc','build/dxvk/bridge_dispatch.inc','reference/dxvk/include/native/directx/d3d9.h']
         report={'status':'PASS_HOST_EXACT_OLD_NEW_MARSHALING_AND_STRICT_ANDROID_ARM64_COMPILE','scope':'Only2constantF numeric size classifiers; actual production memory/Argument/invoke; native setter is fixture boundary, no real GPU/device/FPS claim.',
                 'source_sha256':{p:sha(ROOT/p) for p in pins},'commands':commands,'host_log_sha256':sha(OUT/'host.log'),

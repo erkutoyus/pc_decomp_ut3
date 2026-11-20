@@ -1,7 +1,7 @@
 #include "host.h"
 #include <assert.h>
 #include <sys/mman.h>
-#include "../android/host/ai_perception_native.c"
+#include "../engine/host/ai_perception_native.c"
 
 recomp_ehframe_t *g_eh_frames;
 uint32_t g_eh_obj,g_eh_info;

@@ -49,9 +49,9 @@ int main(void) {
 
     def test_production_wrapper(self):
         OUT.mkdir(parents=True, exist_ok=True)
-        runtime = (ROOT / 'android/runtime/recomp_types.h').read_text()
-        host = (ROOT / 'android/host/host.h').read_text()
-        core = (ROOT / 'android/host/core.c').read_text()
+        runtime = (ROOT / 'engine/runtime/recomp_types.h').read_text()
+        host = (ROOT / 'engine/host/host.h').read_text()
+        core = (ROOT / 'engine/host/core.c').read_text()
         regs = host[host.index('typedef struct void_regs {'):host.index('} void_regs;') + len('} void_regs;')]
         end = runtime.index('} xmm_t;') + len('} xmm_t;')
         xmm = runtime[runtime.rindex('typedef union {', 0, end):end]
@@ -92,8 +92,8 @@ uint32_t g_eh_obj,g_eh_info;
         print(output[-1].decode().strip())
         sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
         report = {'status': 'PASS_HOST_PRODUCTION_CAMERA_WRAPPER_CORE_REGISTERS', 'commands': commands,
-                  'sources': {p: sha(ROOT / p) for p in ['android/host/ui_camera.c', 'tests/test_ui_camera.c',
-                            'tests/test_ui_camera.py', 'android/host/core.c', 'android/host/host.h']},
+                  'sources': {p: sha(ROOT / p) for p in ['engine/host/ui_camera.c', 'tests/test_ui_camera.c',
+                            'tests/test_ui_camera.py', 'engine/host/core.c', 'engine/host/host.h']},
                   'log_sha256': sha(OUT / 'host.log'), 'device_executed': False,
                   'scope': 'Actual wrapper with original core register save; constructor callback mocked. Separate original PE oracle executes real caller and complete constructor.'}
         (OUT / 'receipt.json').write_text(json.dumps(report, indent=2) + '\n')

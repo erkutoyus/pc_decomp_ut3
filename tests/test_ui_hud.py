@@ -22,7 +22,7 @@ class HudScaleTest(unittest.TestCase):
         self.assertEqual(len(original['physical_native_draw_cases']), 32)
         self.assertEqual(original['actual_weapon_caller_operand']['argument_kind'], 'Core.ObjectProperty')
         self.assertEqual(original['actual_metadata_decoder_cases']['bool_mask_offset'], '0x84')
-        source = (ROOT / 'android/host/ui_hud.c').read_text()
+        source = (ROOT / 'engine/host/ui_hud.c').read_text()
         address = re.search(r'WEAPON_CLASS_GLOBAL=(0x[0-9A-Fa-f]+)u', source)
         self.assertIsNotNone(address)
         self.assertEqual(int(address.group(1),16),int(original['weapon_class_registration']['global'],16))
@@ -60,7 +60,7 @@ class HudScaleTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, (result.stdout + result.stderr).decode(errors='replace'))
         self.assertIn(b'PASS original PE', result.stdout)
         original = json.loads((ROOT / 'build/hud-scale-probe/class-global-oracle-receipt.json').read_text())
-        production = (ROOT / 'android/host/ui_hud.c').read_text()
+        production = (ROOT / 'engine/host/ui_hud.c').read_text()
         import re
         address = re.search(r'HUD_CLASS_GLOBAL=(0x[0-9A-Fa-f]+)u', production)
         self.assertIsNotNone(address)
@@ -125,9 +125,9 @@ int main(void) {
 
     def test_production_scope_and_dispatch(self):
         OUT.mkdir(parents=True, exist_ok=True)
-        core = (ROOT / 'android/host/core.c').read_text()
-        host = (ROOT / 'android/host/host.h').read_text()
-        runtime = (ROOT / 'android/runtime/recomp_types.h').read_text()
+        core = (ROOT / 'engine/host/core.c').read_text()
+        host = (ROOT / 'engine/host/host.h').read_text()
+        runtime = (ROOT / 'engine/runtime/recomp_types.h').read_text()
         regs = host[host.index('typedef struct void_regs {'):host.index('} void_regs;') + len('} void_regs;')]
         end = runtime.index('} xmm_t;') + len('} xmm_t;')
         xmm = runtime[runtime.rindex('typedef union {', 0, end):end]
@@ -207,11 +207,11 @@ static void_fn trace_wrap(uint32_t va,void_fn fn) { (void)va;return fn; }
         print(output[-1].decode().strip())
         sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
         report = {'status': 'PASS_HOST_ACTUAL_HUD_SCOPE_AND_CORE_DISPATCH_REGISTERS',
-                  'commands': commands, 'helper_sha256': sha(ROOT / 'android/host/ui_hud.c'),
+                  'commands': commands, 'helper_sha256': sha(ROOT / 'engine/host/ui_hud.c'),
                   'fixture_sha256': sha(ROOT / 'tests/test_ui_hud.c'),
                   'crosshair_fixture_sha256': sha(ROOT / 'tests/test_ui_crosshair.inc'),
-                  'core_source_sha256': sha(ROOT / 'android/host/core.c'),
-                  'host_header_sha256': sha(ROOT / 'android/host/host.h'),
+                  'core_source_sha256': sha(ROOT / 'engine/host/core.c'),
+                  'host_header_sha256': sha(ROOT / 'engine/host/host.h'),
                   'actual_extracted_core_sha256': sha(OUT / 'ui_hud_core.inc'),
                   'platform_sha256': sha(OUT / 'ui_hud_test_platform.h'),
                   'log_sha256': sha(OUT / 'host.log'),
@@ -226,14 +226,14 @@ static void_fn trace_wrap(uint32_t va,void_fn fn) { (void)va;return fn; }
                         [str(clang), '--target=aarch64-linux-android29', '-O2', '-std=gnu11',
                          '-fno-strict-aliasing', '-fwrapv', '-ffp-contract=off', '-fno-math-errno',
                          '-DRECOMP_X87_WINDOW', '-DUT3_ANDROID_APP', '-Wall', '-Werror',
-                         '-Iandroid/runtime', '-Iandroid/host', '-Igenerated', '-c',
-                         'android/host/ui_hud.c', '-o', str(OUT / 'ui_hud.c.o')]]
+                         '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Igenerated', '-c',
+                         'engine/host/ui_hud.c', '-o', str(OUT / 'ui_hud.c.o')]]
         for command in arm_commands:
             result = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=30)
             self.assertEqual(result.returncode, 0, (result.stdout + result.stderr).decode(errors='replace'))
         (OUT / 'arm64-build-receipt.json').write_text(json.dumps({
             'status': 'PASS_ANDROID_ARM64_CROSSCOMPILE_NOT_EXECUTED', 'commands': arm_commands,
-            'helper_sha256': sha(ROOT / 'android/host/ui_hud.c'),
+            'helper_sha256': sha(ROOT / 'engine/host/ui_hud.c'),
             'fixture_sha256': sha(ROOT / 'tests/test_ui_hud.c'),
             'crosshair_fixture_sha256': sha(ROOT / 'tests/test_ui_crosshair.inc'),
             'arm64_fixture_sha256': sha(OUT / 'test-ui-hud-arm64'),

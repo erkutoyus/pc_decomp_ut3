@@ -1,6 +1,6 @@
 /* Production A/W getters share the real environment model; x86 ABI included. */
-#include "../android/host/kernel32.c"
-#include "../android/host/compat.c"
+#include "../engine/host/kernel32.c"
+#include "../engine/host/compat.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

@@ -104,6 +104,6 @@ float4 main(float2 p:VPOS):COLOR0{
         words=struct.unpack('<'+'I'*(len(code)//4),code)
         generated+='static const uint32_t '+name+'[]={\n'+',\n'.join('  '+','.join(f'0x{w:08x}u' for w in words[i:i+8]) for i in range(0,len(words),8))+'\n};\n'
         print(name,len(code),'bytes')
-    (ROOT/'android/host/postfx_shaders.inc').write_text(generated,encoding='utf-8')
+    (ROOT/'engine/host/postfx_shaders.inc').write_text(generated,encoding='utf-8')
 
 if __name__=='__main__':main()

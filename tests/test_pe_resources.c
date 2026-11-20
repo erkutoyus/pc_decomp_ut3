@@ -1,6 +1,6 @@
 /* The production resource APIs over the real UT3 image and bounded malformed fixtures. */
-#include "../android/host/pe_resources.c"
-#include "../android/host/pe.c"
+#include "../engine/host/pe_resources.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

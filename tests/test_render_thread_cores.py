@@ -1,4 +1,4 @@
-"""HOST-run the production render-thread core choice (render_core_mask of android/host/d3d9_thread.c).
+"""HOST-run the production render-thread core choice (render_core_mask of engine/host/d3d9_thread.c).
 
 The pure function is taken from the source as it is and run on big/LITTLE tables: three tiers
 (Snapdragon 8s Gen 3: 1 + 4 + 3), two tiers with several big cores (4 + 4, Helio G90T 2 + 6),
@@ -82,7 +82,7 @@ def function(text, name):
 
 class RenderThreadCoresTest(unittest.TestCase):
     def test_topologies_and_policies(self):
-        source = (ROOT / "android/host/d3d9_thread.c").read_text(encoding="utf-8")
+        source = (ROOT / "engine/host/d3d9_thread.c").read_text(encoding="utf-8")
         start = source.index("enum { RT_CORES_AUTO")
         actual = source[start:source.index(";", start) + 1] + "\n" + function(source, "static long render_core_mask(")
         OUT.mkdir(parents=True, exist_ok=True)

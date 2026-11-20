@@ -16,12 +16,12 @@ def host_run(sources):
     from host_environment import CLANG, environment
     host = OUT / "host"
     host.mkdir(parents=True, exist_ok=True)
-    runtime = (ROOT / "android/runtime/recomp_types.h").read_text()
+    runtime = (ROOT / "engine/runtime/recomp_types.h").read_text()
     runtime = runtime.replace('#error "This header is the ARM64 runtime model; x86 builds use native/recomp_types.h"', "")
     runtime = re.sub(r"static inline uint64_t __rdtsc\(void\) \{.*?\n\}",
         "static inline uint64_t fixture_rdtsc(void) { return 0; }", runtime, flags=re.S)
     (host / "recomp_types.h").write_text(runtime)
-    text = (ROOT / "android/host/host.h").read_text()
+    text = (ROOT / "engine/host/host.h").read_text()
     registers = text[text.index("typedef struct void_regs {"):text.index("} void_regs;") + len("} void_regs;")]
     (host / "host.h").write_text('#pragma once\n#include "recomp_types.h"\n#include <stdarg.h>\n' + registers +
         '\nextern recomp_ehframe_t *g_eh_frames;extern uint32_t g_eh_obj,g_eh_info;\n'
@@ -65,11 +65,11 @@ def main():
     args = parser.parse_args()
     if not args.build_only and not args.serial and not args.host:
         parser.error("--build-only, --host or --serial is required")
-    production = ROOT / "android/host/render_occlusion_native.c"
+    production = ROOT / "engine/host/render_occlusion_native.c"
     source = (args.source or production).resolve()
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "render_occlusion_native_under_test.c").write_bytes(source.read_bytes())
-    text = (ROOT / "android/host/core.c").read_text()
+    text = (ROOT / "engine/host/core.c").read_text()
     context = OUT / "context.c"
     context.write_text('#include "host.h"\n' + text[text.index("VOID_HIDDEN uint32_t g_eax"):text.index("/* --------------------------------------------------------------- logging */")])
     bodies = []
@@ -92,7 +92,7 @@ def main():
     clang = ndk / "toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe"
     binary = OUT / "test-render-occlusion-native"
     command = [str(clang), "--target=aarch64-linux-android29", "-O2", "-fno-strict-aliasing", "-fwrapv", "-ffp-contract=off",
-        "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iandroid/runtime", "-Iandroid/host", "-I" + str(OUT),
+        "-fno-math-errno", "-DRECOMP_X87_WINDOW", "-Iengine/runtime", "-Iengine/host", "-Iengine/host", "-I" + str(OUT),
         *map(str, sources), "-o", str(binary), "-lm"]
     built = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     (OUT / "build.log").write_text(built.stdout + built.stderr)

@@ -1,5 +1,5 @@
 /* Real CreateDirectory/CreateFile/MoveFile and a fresh process over a stored ZIP mount. */
-#include "../android/host/files.c"
+#include "../engine/host/files.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }
@@ -20,6 +20,11 @@ static void word(FILE *f, uint64_t value, unsigned width)
 }
 static const char original[] = "original archive";
 static const char payload[] = "persistent UT3 save fixture";
+#if defined(__APPLE__)
+#define FIXTURE_PREFIX "/tmp/ut3-zip-save-"
+#else
+#define FIXTURE_PREFIX "/data/local/tmp/ut3-zip-save-"
+#endif
 static void make_fixture(const char *root)
 {
     char path[1024]; snprintf(path, sizeof path, "%s/archive.bin", root);
@@ -43,10 +48,10 @@ static void check_read(const char *path, uint32_t memory)
 }
 int main(int argc, char **argv)
 {
-    char temporary[] = "/data/local/tmp/ut3-zip-save-XXXXXX";
+    char temporary[] = FIXTURE_PREFIX "XXXXXX";
     int verify = argc == 3 && !strcmp(argv[1], "--verify");
     const char *root = verify ? argv[2] : mkdtemp(temporary); assert(root);
-    assert(!strncmp(root, "/data/local/tmp/ut3-zip-save-", sizeof("/data/local/tmp/ut3-zip-save-") - 1));
+    assert(!strncmp(root, FIXTURE_PREFIX, sizeof(FIXTURE_PREFIX) - 1));
     if (!verify) make_fixture(root);
     char game[1024], data[1024], index[1024], archive[1024], number[32];
     snprintf(game, sizeof game, "%s/game", root); snprintf(data, sizeof data, "%s/userdata", root);

@@ -1,9 +1,9 @@
-/* The render thread module (android/host/d3d9_thread.c) on its own: the same
+/* The render thread module (engine/host/d3d9_thread.c) on its own: the same
  * records run in the same order inline and on the thread; the ring wraps and
  * fills; big payloads; nested records; answers mid-stream; positions; frame
  * lag; the state mirror follows the device piece by piece.
  * Build: tools/build_host_test.py tests/test_render_thread.c --objects build/<task>/obj --exclude android_main */
-#include "../android/host/d3d9_thread.c"
+#include "../engine/host/d3d9_thread.c"
 #include <assert.h>
 
 /* ------------------------------------------------------------- a trace */

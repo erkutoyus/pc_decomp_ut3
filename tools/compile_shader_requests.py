@@ -1,7 +1,7 @@
 """Compile UT3 shader requests recorded on Android with the game's own D3DX compiler.
 
-The device compiles HLSL that no cache holds with vkd3d-shader (android/host/hlsl_vkd3d.c). A
-request it cannot compile is recorded by android/host/d3dx9.c: the source, the macros, every file
+The device compiles HLSL that no cache holds with vkd3d-shader (engine/host/hlsl_vkd3d.c). A
+request it cannot compile is recorded by engine/host/d3dx9.c: the source, the macros, every file
 the game's include handler served and the cache key. This tool compiles each one on Windows with
 Microsoft's d3dx9_35.dll, the D3DX version UT3 imports, and writes the bytecode (<key>.bin) or the
 compiler's error (<key>.err) the way the host's cache reads them; pushed to <data>/shadercache
@@ -76,7 +76,7 @@ def parse(data):
 
 
 def key(request):
-    """The host's cache key (android/host/d3dx9.c shader_key)."""
+    """The host's cache key (engine/host/d3dx9.c shader_key)."""
     h = 0xCBF29CE484222325
     h = fnv(h, request['source'])
     h = fnv(h, b'\0')

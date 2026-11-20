@@ -1,8 +1,9 @@
-"""Build the optional UT3 UPK texture converter and its Android self-check."""
+"""Build/test the preserved UT3 package converter with native macOS codecs or the legacy NDK recipe."""
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import subprocess
 
@@ -19,20 +20,44 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def build_macos():
+    """Exercise the preserved real codecs and cache locking with native Apple Clang."""
+    OUT.mkdir(parents=True,exist_ok=True)
+    sources=[(p,ASTC) for p in sorted((ROOT/'reference/astcenc/Source').glob('astcenc_*.cpp'))]
+    sources += [(ROOT/'reference/etcpak'/n,['-DBCDEC_STATIC','-DBCDEC_IMPLEMENTATION'])
+                for n in ('ProcessRGB.cpp','Tables.cpp','Dither.cpp','Decode.cpp')]
+    sources += [(ROOT/'engine/textures/codec.cpp',ASTC),(ROOT/'engine/io/zipmount.c',[])]
+    def compile(entry):
+        source,defines=entry;obj=OUT/(source.parent.name+'_'+source.stem+'.o')
+        compiler='clang' if source.suffix=='.c' else 'clang++'
+        standard='-std=c11' if source.suffix=='.c' else '-std=c++17'
+        subprocess.run(['xcrun',compiler,'-arch','arm64','-O2',standard,*defines,'-c',str(source),'-o',str(obj)],check=True)
+        return obj
+    with ThreadPoolExecutor(max_workers=4) as pool:objects=list(pool.map(compile,sources))
+    test=OUT/'texture-check-macos'
+    subprocess.run(['xcrun','clang++','-arch','arm64','-O2','-std=c++17','-UNDEBUG',
+        str(ROOT/'tests/test_texture_packages.cpp'),*map(str,objects),'-lz','-o',str(test)],check=True)
+    subprocess.run([str(test),'--lock',str(OUT/'lock-test')],check=True)
+    print('PASS native macOS real codec/package/cache-lock fixture')
+
+
 def main():
     manifest = ROOT / 'dependencies-textures.json'
     pins = json.loads(manifest.read_text())['sources']
     for name, digest in pins.items():
         if hashlib.sha256((ROOT / name).read_bytes().replace(b'\r\n', b'\n')).hexdigest() != digest:
             raise ValueError('Texture codec source differs from its pin: ' + name)
+    if platform.system() == 'Darwin':
+        build_macos()
+        return
     (OUT / 'obj').mkdir(parents=True, exist_ok=True)
     sources = [(p, ASTC) for p in sorted((ROOT / 'reference/astcenc/Source').glob('astcenc_*.cpp'))]
     sources += [(ROOT / 'reference/etcpak' / n, ['-DBCDEC_STATIC', '-DBCDEC_IMPLEMENTATION'])
                 for n in ('ProcessRGB.cpp', 'Tables.cpp', 'Dither.cpp', 'Decode.cpp')]
-    sources += [(ROOT / 'android/texconv/codec.cpp', ASTC), (ROOT / 'android/texconv/ut3tex.cpp', [])]
-    sources += [(ROOT / 'android/launcher/native/zipmount.c', [])]
-    headers = sorted((ROOT / 'android/texconv').glob('*.h'))
-    headers += [ROOT / 'android/launcher/native/zipmount.h']
+    sources += [(ROOT / 'engine/textures/codec.cpp', ASTC), (ROOT / 'engine/textures/ut3tex.cpp', [])]
+    sources += [(ROOT / 'engine/io/zipmount.c', [])]
+    headers = sorted((ROOT / 'engine/textures').glob('*.h'))
+    headers += [ROOT / 'engine/io/zipmount.h', ROOT / 'engine/textures/ut3tx.h', ROOT / 'engine/textures/tvtx.h']
     digest = hashlib.sha256((sha(manifest) + str(CXX) + ''.join(sha(p) for p in headers)).encode()).hexdigest()
 
     def compile(unit):

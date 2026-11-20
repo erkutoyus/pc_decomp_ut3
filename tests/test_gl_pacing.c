@@ -3,7 +3,7 @@
 #define eglSwapInterval test_eglSwapInterval
 #define glGetIntegerv test_glGetIntegerv
 #define glGetQueryObjectuiv test_glGetQueryObjectuiv
-#include "../android/host/d3d9_gl.c"
+#include "../engine/host/d3d9_gl.c"
 #include <assert.h>
 
 static uint64_t test_now = UINT64_C(1000000000);

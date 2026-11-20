@@ -1,6 +1,7 @@
 """Check the original-image boundary and the guest module address layout."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 import shutil
@@ -12,6 +13,20 @@ sys.path.insert(0, str(ROOT / "tools"))
 from lift_ut3 import prepare, metadata_roots, code_address
 import lift_ut3
 import pefile
+
+
+def game_root():
+    manifest = json.loads((ROOT / "config/inputs.json").read_text())
+    return Path(os.environ.get("UT3_TEST_GAME_ROOT", manifest["source_root"]))
+
+
+def source_image(spec):
+    crt = os.environ.get("UT3_VC80_ROOT")
+    if crt and spec["name"] in {"msvcr80", "msvcp80"}:
+        return Path(crt) / spec["file"]
+    if spec.get("source"):
+        return Path(spec["source"])
+    return game_root() / spec["path"]
 
 
 class LiftInputsTest(unittest.TestCase):
@@ -48,8 +63,22 @@ class LiftInputsTest(unittest.TestCase):
         inputs = json.loads((ROOT / "config/inputs.json").read_text())
         modules = json.loads((ROOT / "config/modules.json").read_text())["modules"]
         pinned = {m["sha256"]: m for m in inputs["modules"]}
-        external = json.loads((ROOT / "research/external-runtime-inputs.json").read_text())
-        pinned.update({m["sha256"]: m for m in external["modules"]})
+        external = ROOT / "research/external-runtime-inputs.json"
+        if external.exists():
+            pinned.update({m["sha256"]: m for m in json.loads(external.read_text())["modules"]})
+        for spec in modules:
+            if spec["sha256"] in pinned:
+                continue
+            source = source_image(spec)
+            if not source.is_file():
+                self.skipTest(f"Pinned input is unavailable: {source}")
+            data = source.read_bytes()
+            self.assertEqual(hashlib.sha256(data).hexdigest(), spec["sha256"], spec["file"])
+            pe = pefile.PE(data=data, fast_load=True)
+            try:
+                pinned[spec["sha256"]] = {"image_size": pe.OPTIONAL_HEADER.SizeOfImage}
+            finally:
+                pe.close()
         spans = sorted((int(m["base"], 0), int(m["base"], 0) + pinned[m["sha256"]]["image_size"])
                        for m in modules)
         self.assertEqual(len({m["file"].lower() for m in modules}), len(modules))
@@ -62,8 +91,7 @@ class LiftInputsTest(unittest.TestCase):
             self.assertLessEqual(end, start)
 
     def test_actual_roots_are_executable(self):
-        manifest = json.loads((ROOT / "config/inputs.json").read_text())
-        source = Path(manifest["source_root"]) / "Binaries/UT3.exe"
+        source = game_root() / "Binaries/UT3.exe"
         if not source.exists():
             self.skipTest("Original UT3 input is unavailable")
         pe = pefile.PE(str(source), fast_load=True)
@@ -81,7 +109,7 @@ class LiftInputsTest(unittest.TestCase):
             self.skipTest("Generated ogg module is unavailable")
         specs = json.loads((ROOT / "config/modules.json").read_text())["modules"]
         spec = dict(next(m for m in specs if m["name"] == "ogg"))
-        source_root = Path(json.loads((ROOT / "config/inputs.json").read_text())["source_root"])
+        source_root = game_root()
         spec["source"] = str(source_root / spec["path"])
         report = json.loads((module / "report.json").read_text())
         address = int(report["dispatch_entries"][0], 0)
@@ -116,6 +144,7 @@ class LiftInputsTest(unittest.TestCase):
         spec = next(m for m in specs if m["name"] == "msvcr80")
         if not spec.get("jump_tables"):
             self.skipTest("No declared CRT jump tables")
+        spec["source"] = str(source_image(spec))
         spec["jump_tables"][0]["sha256"] = "0" * 64
         with tempfile.TemporaryDirectory() as directory:
             old_root = lift_ut3.ROOT

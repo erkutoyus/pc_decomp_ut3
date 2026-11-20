@@ -1,7 +1,7 @@
 """x87 stack slots as C locals in lifted functions (a build step of tools/build_android.py).
 
 The lifted code keeps the x87 stack in a global window (fp_push, fp_pop, _st[i], fp_xch: see
-android/runtime/recomp_types.h, RECOMP_X87_WINDOW): every push and pop moves the window, writes a
+engine/runtime/recomp_types.h, RECOMP_X87_WINDOW): every push and pop moves the window, writes a
 value and an integer shadow, and every _st[i] is a load through it, so x87 arithmetic becomes a chain
 of memory operations (and fp_window_recentre calls). For a function whose x87 stack is empty at entry,
 at every call and at every return, and whose depth is the same on every path into each line, this

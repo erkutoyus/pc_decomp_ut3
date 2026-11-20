@@ -1,5 +1,5 @@
 #include "host.h"
-#include "../android/host/game_native.c"
+#include "../engine/host/game_native.c"
 #include <assert.h>
 #include <sys/mman.h>
 

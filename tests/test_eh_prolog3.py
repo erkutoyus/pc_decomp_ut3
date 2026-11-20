@@ -1,6 +1,7 @@
 """Verify VC8 helper frames against the original pinned MSVCP80 instructions."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import struct
 import sys
@@ -23,7 +24,8 @@ class Prolog3Test(unittest.TestCase):
     def setUpClass(cls):
         modules = json.loads((ROOT / "config/modules.json").read_text())["modules"]
         spec = next(row for row in modules if row["name"] == "msvcp80")
-        source = Path(spec["source"])
+        crt_root = os.environ.get("UT3_TEST_VC80_ROOT")
+        source = Path(crt_root) / spec["file"] if crt_root else Path(spec["source"])
         if not source.is_file():
             raise unittest.SkipTest("requires the pinned original MSVCP80 DLL")
         raw = source.read_bytes()

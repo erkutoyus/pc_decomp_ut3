@@ -12,9 +12,9 @@ OUT.mkdir(parents=True, exist_ok=True)
 PIN = ROOT / 'build/xmm-separate-candidate/candidate.json'
 pins = json.loads(PIN.read_text(encoding='utf-8'))
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
-canonical = ROOT / 'android/runtime/recomp_types.h'
+canonical = ROOT / 'engine/runtime/recomp_types.h'
 candidate = ROOT / 'build/xmm-separate-candidate/include/recomp_types.h'
-prefix = ROOT / 'android/runtime/guest_state_prefix.h'
+prefix = ROOT / 'engine/runtime/guest_state_prefix.h'
 assert sha(canonical) == pins['canonical_header_sha256']
 assert sha(candidate) == pins['candidate_header_sha256']
 assert sha(prefix) == pins['unchanged_prefix_sha256']
@@ -32,8 +32,8 @@ def run(values):
 flags = ['--target=aarch64-linux-android29', '-O2', '-std=gnu11', '-Wall', '-fno-strict-aliasing',
          '-fwrapv', '-ffp-contract=off', '-fno-math-errno', '-fPIC', '-fvisibility=hidden', '-g0',
          '-DRECOMP_X87_WINDOW']
-includes = ['-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke', '-Ireference/mojoshader']
-host_sources = [ROOT / 'tests/test_xmm_separate.c'] + [ROOT / 'android/host' / f for f in ('core.c', 'memory.c', 'strings.c')]
+includes = ['-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke', '-Ireference/mojoshader']
+host_sources = [ROOT / 'tests/test_xmm_separate.c'] + [ROOT / 'engine/host' / f for f in ('core.c', 'memory.c', 'strings.c')]
 objects = []
 for path in host_sources:
     obj = OUT / (path.stem + '.o'); run([clang, *flags, *includes, '-c', path, '-o', obj]); objects.append(obj)
@@ -67,7 +67,7 @@ for name, header in [('baseline', canonical), ('candidate', candidate)]:
 assert sha(canonical) == pins['canonical_header_sha256'] and sha(candidate) == pins['candidate_header_sha256']
 report = {'status': 'CROSS_COMPILED_NOT_RUN', 'scope': 'No adb/app/build lifecycle; real core/memory/threads with synthetic byte-level XMM overlap oracle and actual callback/VM-handover paths.',
           'commands': commands, 'variants': variants,
-          'sources_sha256': {str(p.relative_to(ROOT)): sha(p) for p in [*host_sources, probe, owner, owner_source, Path(__file__), ROOT / 'android/host/threads.c', canonical, candidate, prefix]},
+          'sources_sha256': {str(p.relative_to(ROOT)): sha(p) for p in [*host_sources, probe, owner, owner_source, Path(__file__), ROOT / 'engine/host/threads.c', canonical, candidate, prefix]},
           'support_sha256': {str(p.relative_to(ROOT)): sha(p) for p in support}, 'candidate_pin_sha256': sha(PIN),
           'runtime_required': 'Run both isolated ELFs; require PASS and identical checksum. No runtime result is inferred from successful compilation.'}
 (OUT / 'receipt.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')

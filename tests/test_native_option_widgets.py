@@ -294,11 +294,11 @@ class NativeOptionWidgets(unittest.TestCase):
                   "touchVisible", "touchStaticStick", "touchWeaponSwipe", "touchWeaponButtonSwipe",
                   "touchWeaponTap", "weaponBarScale", "weaponWheelScale", "fsr1", "antialias"]
         port = ["touchVehicleProfile", "touchGyro", "language", "fpsLimit"]
-        languages = sorted(path.name for path in (ROOT / "android/uscript/AndroidPort").glob("AndroidPortOptions*.ini"))
+        languages = sorted(path.name for path in (ROOT / "engine/uscript/AndroidPort").glob("AndroidPortOptions*.ini"))
         self.assertEqual(languages, ["AndroidPortOptions-%s.ini" % code for code in
                                      ("CZE", "DEU", "ESN", "FRA", "HUN", "ITA", "POL", "RUS")] + ["AndroidPortOptions.ini"])
         for language in languages:
-            text = (ROOT / "android/uscript/AndroidPort" / language).read_text(encoding="utf-8")
+            text = (ROOT / "engine/uscript/AndroidPort" / language).read_text(encoding="utf-8")
             self.assertEqual(re.findall(r"^OptionIndex=(\d+)$", text, re.M), ["0"] * (len(values) + len(port)), language)
             self.assertEqual(re.findall(r"DataStoreMarkup=<AndroidPortValues:(\w+)>", text), values, language)
             self.assertEqual(re.findall(r"DataStoreMarkup=<AndroidPort:(\w+)>", text), port, language)

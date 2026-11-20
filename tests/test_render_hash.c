@@ -1,5 +1,5 @@
 /* Compare the native lookup with its three current generated functions using the production runtime. */
-#include "../android/host/render_hash_native.c"
+#include "../engine/host/render_hash_native.c"
 #include <assert.h>
 #include <sys/mman.h>
 

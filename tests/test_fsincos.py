@@ -26,7 +26,7 @@ class FsincosTest(unittest.TestCase):
         decoder = Cs(CS_ARCH_X86, CS_MODE_32)
         decoder.detail = True
         lifted = '\n'.join(CheckedLifter().lift_instruction(next(decoder.disasm(original, 0x1E01D674))))
-        header = (ROOT/'android/runtime/recomp_types.h').read_text(encoding='utf-8')
+        header = (ROOT/'engine/runtime/recomp_types.h').read_text(encoding='utf-8')
         push = touch_checks.TouchControlsTest._method(header, 'static inline void fp_push_impl(')
         angles = (0.0, 1e-6, -1e-6, .01, -.01, math.pi/180, -math.pi/180,
                   math.pi/4, -math.pi/4, math.pi/2, math.pi, 2*math.pi, 10.0, -10.0)

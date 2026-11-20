@@ -1,8 +1,8 @@
 /* Real GLES: spatial reconstruction/AA, VPOS row gradient, restored D3D9 state and resource reset. */
 #include <assert.h>
 #include <unistd.h>
-#include "../android/host/d3d9_device.c"
-#include "../android/host/postfx.c"
+#include "../engine/host/d3d9_device.c"
+#include "../engine/host/postfx.c"
 void void_process_exit(uint32_t code,int detach){(void)detach;_exit((int)code);}
 
 static uint32_t shader(uint32_t device,int pixel,const char *source,uint32_t scratch)

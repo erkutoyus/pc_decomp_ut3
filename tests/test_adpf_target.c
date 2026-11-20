@@ -1,5 +1,5 @@
 /* Real own-PID API sessions: verify the actual duration passed to Android. */
-#include "../android/host/adpf.c"
+#include "../engine/host/adpf.c"
 #include <assert.h>
 #include <limits.h>
 #include <stdarg.h>

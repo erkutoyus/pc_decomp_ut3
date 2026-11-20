@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <time.h>
-#include "../android/host/render_native.c"
+#include "../engine/host/render_native.c"
 
 enum { STACK = 0x20008, A = 0x30000, B = 0x30100, OUT = 0x30200,
        FRUSTUM = 0x40000, CENTER = 0x40100, PLANES = 0x40200,

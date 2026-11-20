@@ -9,7 +9,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 import protocol_transform as pt
-from build_android import (DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, UE3_NATIVE_TARGETS, WRAPS,
+from lift_build import (DEFAULT_CALL_PROTOCOL, NATIVE_CALL_CONTRACT, UE3_NATIVE_TARGETS, WRAPS,
                            native_same_unit_calls, validate_native_call_contract)
 
 

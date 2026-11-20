@@ -110,7 +110,7 @@ static int fixture_rename(const char *from,const char *to) {
         fixture.write_text(r'''
 #include <cassert>
 #include <cstdlib>
-#include "../../android/texconv/ut3tex.cpp"
+#include "../../engine/textures/ut3tex.cpp"
 extern "C" int texconv_convert_dds(const uint8_t *data,uint64_t size,int family,uint8_t **out,
     uint64_t *bytes,uint32_t *format,uint32_t *flags) {
     assert(bytes_total>0 && total>0);
@@ -175,7 +175,7 @@ int main(int argc,char **argv) {
         env, linker = environment('x64')
         java = Path(os.environ['JAVA_HOME'])
         for source, obj, flags in ((fixture, OUT / 'check.obj', ['/std:c++17', '/EHsc']),
-                                  (ROOT / 'android/launcher/native/zipmount.c', OUT / 'zipmount.obj', ['/std:c11'])):
+                                  (ROOT / 'engine/io/zipmount.c', OUT / 'zipmount.obj', ['/std:c11'])):
             compiler = linker.with_name('cl.exe') if source.suffix == '.cpp' else CLANG
             target = [] if source.suffix == '.cpp' else ['/clang:--target=x86_64-pc-windows-msvc']
             result = subprocess.run([str(compiler), '/nologo', '/O2', '/D_CRT_SECURE_NO_WARNINGS', '/DNOMINMAX',

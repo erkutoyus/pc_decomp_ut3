@@ -1,5 +1,5 @@
 /* Production identity API contracts and x86 stdcall, including short buffers. */
-#include "../android/host/kernel32.c"
+#include "../engine/host/kernel32.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

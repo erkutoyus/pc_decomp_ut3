@@ -1,7 +1,7 @@
-/* The production image source (android/host/pe_images.c) over the game's real files: every lifted
+/* The production image source (engine/host/pe_images.c) over the game's real files: every lifted
  * image made from the original Binaries must equal its prepared copy in generated/input byte for byte.
  * Run by test_pe_images.py with the installation, generated/input and a "file base" list. */
-#include "../android/host/pe_images.c"
+#include "../engine/host/pe_images.c"
 #include <stdarg.h>
 
 static const char *game_root, *prepared_root;

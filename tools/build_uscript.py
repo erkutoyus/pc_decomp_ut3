@@ -51,7 +51,7 @@ def prepare(work, original, package):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", default="AndroidPort")
-    parser.add_argument("--source", type=Path, default=ROOT / "android/uscript/AndroidPort")
+    parser.add_argument("--source", type=Path, default=ROOT / "engine/uscript/AndroidPort")
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", args.package):
         parser.error("Package must be an UnrealScript identifier")

@@ -6,7 +6,7 @@
 #include <sched.h>
 #include <time.h>
 #include <cstring>
-#include "../android/dxvk/turnip.inc"
+#include "../engine/dxvk/legacy_turnip.inc"
 
 static uint64_t clockns(clockid_t clock){timespec t{};clock_gettime(clock,&t);return uint64_t(t.tv_sec)*1000000000+t.tv_nsec;}
 int main(int argc,char **argv) {

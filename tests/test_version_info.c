@@ -1,5 +1,5 @@
 /* Production version exports, Win32 data widths and x86 stack cleanup. */
-#include "../android/host/kernel32.c"
+#include "../engine/host/kernel32.c"
 #include <assert.h>
 
 typedef struct { uint32_t size, major, minor, build, platform; uint8_t csd[128]; } info_a;

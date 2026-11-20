@@ -4,7 +4,7 @@ import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-OPTIONS = ROOT / 'android/uscript/AndroidPort'
+OPTIONS = ROOT / 'engine/uscript/AndroidPort'
 
 
 def sections(path):

@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 import struct
 
+from lift_build import host_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFINITION = re.compile(r"^void (sub_([0-9A-F]{8}))\(void\)\s*\{", re.M)
 ENTRY = re.compile(r"\bRECOMP_ENTER\(0x([0-9A-Fa-f]{8})u\);")
@@ -64,10 +66,11 @@ def wrapper_entries(text):
 
 
 def included_host_text(text):
-    """The .inc files of android/host a host source includes (a replacement may be defined in one)."""
-    return "\n".join((ROOT / "android/host" / name).read_text(encoding="utf-8", errors="replace")
-                     for name in re.findall(r'#include "([A-Za-z0-9_]+\.inc)"', text)
-                     if (ROOT / "android/host" / name).is_file())
+    """Include shared and Android host fragments when discovering replacements."""
+    names = re.findall(r'#include "([A-Za-z0-9_]+\.inc)"', text)
+    return "\n".join(path.read_text(encoding="utf-8", errors="replace")
+                     for name in names for directory in ("engine/host",)
+                     if (path := ROOT / directory / name).is_file())
 
 
 def override_entries(text):
@@ -125,7 +128,7 @@ class CoveragePlan:
             specs = json.loads((ROOT / "config/modules.json").read_text())["modules"]
         modules = {r["name"]: r for r in specs}
         entries, addresses, module_counts = [], {}, Counter()
-        for path in sorted(map(Path, lifted)):
+        for path in sorted(Path(p).resolve() for p in lifted):
             if path.parent.name not in modules:
                 if generated_entries(path.read_text(encoding="utf-8")):
                     raise ValueError(f"Lifted functions in unknown module: {path}")
@@ -296,9 +299,9 @@ def main():
     report.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "inventory":
-        from build_android import generated_sources, WRAPS
+        from lift_build import generated_sources, WRAPS
         sources, _ = generated_sources(args.generated.resolve())
-        plan = CoveragePlan.create(args.generated, sources, (ROOT / "android/host").glob("*.c"), WRAPS, args.output)
+        plan = CoveragePlan.create(args.generated, sources, host_sources(), WRAPS, args.output)
         print(json.dumps({"entries": len(plan.manifest["entries"]), "identity_sha256": plan.manifest["identity_sha256"],
                           "manifest": str(plan.manifest_path)}))
     else:

@@ -15,7 +15,7 @@ ADDRESSES=("00BF81A0","00BF82A0","00BF82F0","00BF8340")
 
 def prepare():
     OUT.mkdir(parents=True,exist_ok=True)
-    core=(ROOT/"android/host/core.c").read_text()
+    core=(ROOT/"engine/host/core.c").read_text()
     context=OUT/"context.c"
     context.write_text('#include "host.h"\n'+core[core.index("VOID_HIDDEN uint32_t g_eax"):core.index("/* --------------------------------------------------------------- logging */")])
     source=(ROOT/"generated/ut3/functions_0286.c").read_text()
@@ -35,12 +35,12 @@ def prepare():
 
 def host_build(sources):
     directory=OUT/"host";(directory/"sys").mkdir(parents=True,exist_ok=True)
-    runtime=(ROOT/"android/runtime/recomp_types.h").read_text().replace(
+    runtime=(ROOT/"engine/runtime/recomp_types.h").read_text().replace(
         '#error "This header is the ARM64 runtime model; x86 builds use native/recomp_types.h"',"")
     runtime=re.sub(r"static inline uint64_t __rdtsc\(void\) \{.*?\n\}",
         "static inline uint64_t fixture_rdtsc(void) { return 0; }",runtime,flags=re.S)
     (directory/"recomp_types.h").write_text(runtime)
-    header=(ROOT/"android/host/host.h").read_text()
+    header=(ROOT/"engine/host/host.h").read_text()
     registers=header[header.index("typedef struct void_regs {"):header.index("} void_regs;")+len("} void_regs;")]
     (directory/"host.h").write_text('#ifndef VOID_HOST_H\n#define VOID_HOST_H\n#include "recomp_types.h"\n#include <stdarg.h>\n'+registers+
         '\nextern recomp_ehframe_t *g_eh_frames;extern uint32_t g_eh_obj,g_eh_info;\n'
@@ -74,13 +74,13 @@ def main():
         ndk=Path(os.environ.get("ANDROID_NDK_HOME",sdk/"ndk/27.2.12479018"))
         clang=ndk/"toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe";binary=OUT/"test-render-bitarray-native";env=None
         commands=[[str(clang),"--target=aarch64-linux-android29","-O2","-fno-strict-aliasing","-fwrapv","-ffp-contract=off",
-            "-DRECOMP_X87_WINDOW","-Iandroid/runtime","-Iandroid/host",*map(str,sources),"-o",str(binary),"-lm"]]
+            "-DRECOMP_X87_WINDOW","-Iengine/runtime","-Iengine/host", "-Iengine/host",*map(str,sources),"-o",str(binary),"-lm"]]
     logs=[]
     for command in commands:
         result=subprocess.run(command,cwd=ROOT,env=env,capture_output=True,text=True);logs.append(result.stdout+result.stderr)
         (binary.parent/"build.log").write_text("\n".join(logs));assert result.returncode==0,logs[-1]
-    files=[*sources,ROOT/"android/host/render_bitarray_native.c",ROOT/"android/runtime/recomp_types.h",ROOT/"android/host/core.c",
-        ROOT/"android/host/host.h",ROOT/"generated/ut3/functions_0286.c",Path(__file__),binary]
+    files=[*sources,ROOT/"engine/host/render_bitarray_native.c",ROOT/"engine/runtime/recomp_types.h",ROOT/"engine/host/core.c",
+        ROOT/"engine/host/host.h",ROOT/"generated/ut3/functions_0286.c",Path(__file__),binary]
     receipt={"status":"BUILT","target":"host-x64" if args.host else "android-arm64","commands":commands,
         "oracle":"Four canonical lifted bodies, only symbol names changed; all cluster-internal oracle calls remain original.",
         "limitations":"Allocation and memcpy/memset boundaries are deterministic mocked engine callbacks; no gameplay/performance claim.",

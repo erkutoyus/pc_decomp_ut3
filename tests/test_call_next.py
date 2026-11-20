@@ -158,7 +158,7 @@ def compile_owner(raw, pe, out):
     common = [str(clang), '--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing',
               '-fwrapv', '-ffreestanding', '-fno-builtin', '-nostdlib', '-static',
               '-Wl,-e,sub_00B6AC10', '-Wl,-Ttext=0x40000000',
-              '-I' + str(ROOT / 'android/runtime'), '-I' + str(emitted)]
+              '-I' + str(ROOT / 'engine/runtime'), '-I' + str(emitted)]
     command = common + [str(out / 'harness.c'), str(emitted / 'recomp_0000.c'), '-o', str(out / 'owner')]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     (out / 'compile.log').write_text(result.stdout + result.stderr)
@@ -178,13 +178,13 @@ def compile_owner(raw, pe, out):
     # globals are ELF storage outside the fixed guest window, as on Android.
     flags = [str(clang), '--target=aarch64-linux-android29', '-O2', '-fno-strict-aliasing',
              '-fwrapv', '-ffreestanding', '-fno-builtin',
-             '-I' + str(ROOT / 'android/runtime'), '-I' + str(emitted)]
+             '-I' + str(ROOT / 'engine/runtime'), '-I' + str(emitted)]
     commands = [command]
     for source, name, extra in [
             (out / 'harness.c', 'harness.o', []),
             (emitted / 'recomp_0000.c', 'owner.o', ['-DRECOMP_GUEST_STATE_SEPARATE',
              '-mllvm', '-basic-aa-separate-storage', '-include',
-             str(ROOT / 'android/runtime/guest_state_prefix.h')])]:
+             str(ROOT / 'engine/runtime/guest_state_prefix.h')])]:
         cmd = flags + extra + ['-c', str(source), '-o', str(out / name)]
         subprocess.run(cmd, cwd=ROOT, check=True, capture_output=True)
         commands.append(cmd)
@@ -331,8 +331,8 @@ class CallNextTest(unittest.TestCase):
                   'compile_commands': commands,
                   'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                                     for p in [Path(__file__), ROOT / 'tools/lift_game.py',
-                                              ROOT / 'android/runtime/recomp_types.h',
-                                              ROOT / 'android/runtime/guest_state_prefix.h']},
+                                              ROOT / 'engine/runtime/recomp_types.h',
+                                              ROOT / 'engine/runtime/guest_state_prefix.h']},
                   'device_used': False}
         (ROOT / 'research/pixel10-crash/call-next-regression.json').write_text(json.dumps(report, indent=2) + '\n')
 

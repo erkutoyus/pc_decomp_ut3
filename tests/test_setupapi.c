@@ -1,6 +1,6 @@
 /* Production empty-PPU device sets, ABI, object ownership and Windows errors. */
-#include "../android/host/setupapi.c"
-#include "../android/host/pe.c"
+#include "../engine/host/setupapi.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 #include <unistd.h>
 

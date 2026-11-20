@@ -1,6 +1,6 @@
 /* Production shared D3DX math against independent native Windows fixtures. */
-#include "../android/host/d3dx_math.c"
-#include "../android/host/pe.c"
+#include "../engine/host/d3dx_math.c"
+#include "../engine/host/pe.c"
 #include "d3dx_matrix_vectors.h"
 #include <assert.h>
 #include <float.h>

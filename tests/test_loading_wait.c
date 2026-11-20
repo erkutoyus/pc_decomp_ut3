@@ -1,13 +1,13 @@
 /* Exercise the production checked dispatch wrapper and the real machine
  * release/save/restore while another guest thread changes every register. */
-#include "../android/host/threads.c"
+#include "../engine/host/threads.c"
 #include <assert.h>
 static unsigned waits_begun, waits_ended;
 static void fixture_block_begin(void) { ++waits_begun; void_blocking_begin(); }
 static void fixture_block_end(void) { void_blocking_end(); ++waits_ended; }
 #define void_blocking_begin fixture_block_begin
 #define void_blocking_end fixture_block_end
-#include "../android/host/loading.c"
+#include "../engine/host/loading.c"
 #undef void_blocking_begin
 #undef void_blocking_end
 

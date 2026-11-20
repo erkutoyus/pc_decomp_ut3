@@ -1,6 +1,6 @@
 /* Real JNI text boundary and pending queue; synthetic UI token only in this fixture. */
 #define UT3_ANDROID_APP
-#include "../android/host/input.c"
+#include "../engine/host/input.c"
 #include <assert.h>
 #include <stdio.h>
 

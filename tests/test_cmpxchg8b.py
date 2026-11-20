@@ -168,9 +168,9 @@ def main():
     ndk = Path(os.environ.get('ANDROID_NDK_HOME', sdk / 'ndk/27.2.12479018'))
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     flags = ['--target=aarch64-linux-android29', '-O1', '-DRECOMP_X87_WINDOW', '-DRECOMP_TRACE', '-DRECOMP_LOCAL_REGS',
-             '-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke', '-I' + str(generated)]
+             '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke', '-I' + str(generated)]
     own = []
-    for index, source in enumerate([ROOT / 'tests/test_cmpxchg8b.c', ROOT / 'android/host/core.c', *sorted(generated.glob('*.c'))]):
+    for index, source in enumerate([ROOT / 'tests/test_cmpxchg8b.c', ROOT / 'engine/host/core.c', *sorted(generated.glob('*.c'))]):
         obj = output / f'test-{index}.o'
         subprocess.run([str(clang), *flags, '-c', str(source), '-o', str(obj)], cwd=ROOT, check=True)
         own.append('"' + obj.as_posix() + '"')

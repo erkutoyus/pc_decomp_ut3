@@ -14,8 +14,8 @@ def main():
     ndk = Path(os.environ.get('ANDROID_NDK_HOME', sdk / 'ndk/27.2.12479018'))
     clang = ndk / 'toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
     flags = ['--target=aarch64-linux-android29', '-O1', '-DRECOMP_X87_WINDOW', '-DRECOMP_TRACE',
-             '-Iandroid/runtime', '-Iandroid/host', '-Ibuild/host-smoke']
-    sources = [ROOT / 'tests/test_wsa_readiness.c', ROOT / 'android/host/core.c', ROOT / 'android/host/threads.c']
+             '-Iengine/runtime', '-Iengine/host', '-Iengine/host', '-Ibuild/host-smoke']
+    sources = [ROOT / 'tests/test_wsa_readiness.c', ROOT / 'engine/host/core.c', ROOT / 'engine/host/threads.c']
     own = []
     for index, source in enumerate(sources):
         obj = output / f'test-{index}.o'
@@ -37,7 +37,7 @@ def main():
     (ROOT / 'research/device-wsa-readiness.log').write_text(result.stdout)
     if result.returncode:
         raise RuntimeError(f'WSA readiness test failed: {result.returncode}')
-    provenance = [*sources, ROOT / 'android/host/network.c']
+    provenance = [*sources, ROOT / 'engine/host/network.c']
     (ROOT / 'research/wsa-readiness-test.json').write_text(json.dumps({
         'status': 'PASS', 'device': adb[-1],
         'sources': {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in provenance},

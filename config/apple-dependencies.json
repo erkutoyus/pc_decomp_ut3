@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "sdk": {
+    "version": "1.4.363.0",
+    "url": "https://vulkan.lunarg.com/sdk/download/1.4.363.0/mac/vulkansdk-macos-1.4.363.0.zip",
+    "sha256": "163431e0203c8215286a17cf393643ce6b951f77d1b4f74ab30821a1f0beb09b",
+    "files": {
+      "include/vulkan/vulkan.h": "096f50152d0b298d8df84a561a37d8190c8a60af34dff0e2cc8328b24491a640",
+      "bin/glslangValidator": "77e39324822e5c51329770c3b542807419e3b6f2e6bdf0127f9520f98aff482a",
+      "lib/libvulkan.1.dylib": "2f2bacd1f5d3dcc3b7103801bd9371b5b40fbe0cf68869ed419dc77ab380233c",
+      "lib/libvulkan_kosmickrisp.dylib": "52d7b68364e19d744882533d663d69b898bfd294f4248b3313785ad801e23e58",
+      "lib/libMoltenVK.dylib": "583db6b034852823ad40c0c80fe0f5f145bd55b031310d356c29d685efe8d61c",
+      "lib/MoltenVK.xcframework/ios-arm64/libMoltenVK.a": "c5c75b112ba4102d17b353f223d2d8e36438c962a3f9cb615423962ae213f288"
+    }
+  },
+  "openal": {
+    "revision": "b2c48f7718ef3fcf67921a8b6534c4914e328970",
+    "url": "https://codeload.github.com/kcat/openal-soft/tar.gz/b2c48f7718ef3fcf67921a8b6534c4914e328970",
+    "sha256": "6a3e5f80058ecf994a6885d7db5013629a259c659ab40a6f17db8963ceb211b2"
+  },
+  "windows_iso": {
+    "url": "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_LTSC_EVAL_x64FRE_en-us.iso",
+    "sha256": "67cec5865eaa037a72ddc633a717a10a2bed50778862267223ddb9c60ef5da68"
+  },
+  "dxvk_archives": [
+    {
+      "name": "dxvk",
+      "url": "https://codeload.github.com/doitsujin/dxvk/tar.gz/0cf05780abd7250c2cd713b7749cf32180157cf5",
+      "file": "dxvk.tar.gz",
+      "sha256": "64b1c768dbff87cf7bbea6803502826491293be7a533d3079b8da69e1e7f0aa0",
+      "directory": "dxvk-0cf05780abd7250c2cd713b7749cf32180157cf5",
+      "destination": "."
+    },
+    {
+      "name": "directx",
+      "url": "https://codeload.github.com/Joshua-Ashton/mingw-directx-headers/tar.gz/9df86f2341616ef1888ae59919feaa6d4fad693d",
+      "file": "mingw-directx-headers.tar.gz",
+      "sha256": "9c1b8bbfd2d6c758fac4d93c2808a46bc1eee429fe656b4f21b29e02615aa8aa",
+      "directory": "mingw-directx-headers-9df86f2341616ef1888ae59919feaa6d4fad693d",
+      "destination": "include/native/directx"
+    },
+    {
+      "name": "vulkan",
+      "url": "https://codeload.github.com/KhronosGroup/Vulkan-Headers/tar.gz/46dc0f6e514f5730784bb2cac2a7c731636839e8",
+      "file": "Vulkan-Headers.tar.gz",
+      "sha256": "322c947754bae5e3cdca3b21aba20f420569f14e4784b20cdbc7565e2b593734",
+      "directory": "Vulkan-Headers-46dc0f6e514f5730784bb2cac2a7c731636839e8",
+      "destination": "include/vulkan"
+    },
+    {
+      "name": "spirv",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/8b246ff75c6615ba4532fe4fde20f1be090c3764",
+      "file": "SPIRV-Headers.tar.gz",
+      "sha256": "cfeed5f9a97d12a9761a26e7f5bd10fedb1a8ce92033075151ae3bc7206fc229",
+      "directory": "SPIRV-Headers-8b246ff75c6615ba4532fe4fde20f1be090c3764",
+      "destination": "include/spirv"
+    },
+    {
+      "name": "display",
+      "url": "https://codeload.github.com/doitsujin/libdisplay-info/tar.gz/275e6459c7ab1ddd4b125f28d0440716e4888078",
+      "file": "libdisplay-info.tar.gz",
+      "sha256": "c83c3e600f90a3ac98932e9259de62ad8ad3a65dd5efb1d2abcb1e4d1c8f494a",
+      "directory": "libdisplay-info-275e6459c7ab1ddd4b125f28d0440716e4888078",
+      "destination": "subprojects/libdisplay-info"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 #define main affinity_fixture_unused_main
 #include "test_native_affinity.c"
 #undef main
-#include "../android/host/d3d9_dxvk.c"
+#include "../engine/host/d3d9_dxvk.c"
 typedef struct {void *native;uint32_t refs,addrefs,releases;} native_record;
 static native_record records[2048];
 static unsigned record_count;

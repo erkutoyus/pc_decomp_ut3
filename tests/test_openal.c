@@ -1,6 +1,6 @@
 /* Production guest CDECL bridge and real pinned AAudio playback, in isolation. */
-#include "../android/host/openal.c"
-#include "../android/host/pe.c"
+#include "../engine/host/openal.c"
+#include "../engine/host/pe.c"
 #include "test_openal_apis.h"
 #include <assert.h>
 #include <math.h>

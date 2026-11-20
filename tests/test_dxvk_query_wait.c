@@ -29,7 +29,7 @@ static int fixture_sleep(const struct timespec *delay, struct timespec *remainin
     return 0;
 }
 #define nanosleep fixture_sleep
-#include "../android/dxvk/query_wait.inc"
+#include "../engine/dxvk/query_wait.inc"
 #undef nanosleep
 
 int main(int argc, char **argv)

@@ -117,7 +117,7 @@ class PaddwTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             source, binary = Path(directory) / "probe.c", Path(directory) / "probe"
             source.write_text(c_probe())
-            subprocess.run([str(clang), "--target=aarch64-linux-android29", "-O2", "-I", str(ROOT / "android/runtime"), str(source), "-o", str(binary)], check=True)
+            subprocess.run([str(clang), "--target=aarch64-linux-android29", "-O2", "-I", str(ROOT / "engine/runtime"), str(source), "-o", str(binary)], check=True)
             target = [str(adb), "-s", os.environ["UT3_TEST_ANDROID"]]
             subprocess.run([*target, "push", str(binary), remote], check=True, capture_output=True)
             subprocess.run([*target, "shell", "chmod", "755", remote], check=True)

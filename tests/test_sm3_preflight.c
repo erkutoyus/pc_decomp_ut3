@@ -13,7 +13,7 @@ static void shader_test_log(const char *format, ...)
     va_end(ap);
 }
 #define void_log shader_test_log
-#include "../android/host/d3d9_shader.c"
+#include "../engine/host/d3d9_shader.c"
 #undef void_log
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

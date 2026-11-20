@@ -3,8 +3,8 @@
 #include "ui_list_test_platform.h"
 #include <assert.h>
 #include <float.h>
-#include "../android/host/touch_game.c"
-#include "../android/host/ui_list_scale.c"
+#include "../engine/host/touch_game.c"
+#include "../engine/host/ui_list_scale.c"
 
 enum { LIST_TEST_SIZE=0x02000000, ENGINE=0x100000,VIEWPORT=0x110000,ENGINE_CLASS=0x120000,
     PORT_CLASS=0x121000,OBJECT_KIND=0x122000,INT_KIND=0x123000,FLOAT_KIND=0x124000,

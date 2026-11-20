@@ -1,6 +1,6 @@
 """Apply the whole-program call-boundary summary (tools/call_protocol.py) to generated bodies:
 masked register publication at calls, tails and exits, and flags only where a reader exists.
-See android/runtime/recomp_types.h, "Masked call protocol".
+See engine/runtime/recomp_types.h, "Masked call protocol".
 
 UT3 copy of homm5/tools/protocol_transform.py (the Heroes V pass this port follows), with three
 UT3 rules on top:

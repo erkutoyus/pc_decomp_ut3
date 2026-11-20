@@ -1,5 +1,5 @@
 /* Actual SM3 parsing/link/upload: a literal terrain LOD table must survive API constants and relinking. */
-#include "../android/host/d3d9_shader.c"
+#include "../engine/host/d3d9_shader.c"
 #include <assert.h>
 #include <math.h>
 #include <sys/stat.h>

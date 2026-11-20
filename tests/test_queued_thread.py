@@ -168,11 +168,11 @@ def compile_generated(out):
     text='#define RECOMP_GENERATED_CODE\n#include "recomp_types.h"\n'+ '\n'.join('void sub_%08X(void);'%a for a in [*OWNERS,0xBA6880,0xB55380])+'\n'+'\n'.join(bodies)
     (out/'generated.c').write_text(text);(out/'harness.c').write_text(HARNESS)
     clang=Path.home()/'AppData/Local/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe'
-    flags=[str(clang),'--target=aarch64-linux-android29','-O2','-fno-strict-aliasing','-fwrapv','-ffp-contract=off','-fno-math-errno','-ffreestanding','-fno-builtin','-DRECOMP_X87_WINDOW','-I'+str(ROOT/'android/runtime')]
+    flags=[str(clang),'--target=aarch64-linux-android29','-O2','-fno-strict-aliasing','-fwrapv','-ffp-contract=off','-fno-math-errno','-ffreestanding','-fno-builtin','-DRECOMP_X87_WINDOW','-I'+str(ROOT/'engine/runtime')]
     commands=[]
     command=flags+['-nostdlib','-static','-Wl,-e,sub_00BA7100','-Wl,-Ttext=0x40000000',str(out/'harness.c'),str(out/'generated.c'),'-o',str(out/'plain')]
     subprocess.run(command,check=True,capture_output=True);commands.append(command)
-    for name,extra in [('harness',[]),('generated',['-DRECOMP_GUEST_STATE_SEPARATE','-mllvm','-basic-aa-separate-storage','-include',str(ROOT/'android/runtime/guest_state_prefix.h')])]:
+    for name,extra in [('harness',[]),('generated',['-DRECOMP_GUEST_STATE_SEPARATE','-mllvm','-basic-aa-separate-storage','-include',str(ROOT/'engine/runtime/guest_state_prefix.h')])]:
         command=flags+extra+['-c',str(out/(name+'.c')),'-o',str(out/(name+'.o'))]
         subprocess.run(command,check=True,capture_output=True);commands.append(command)
     command=[str(clang),'--target=aarch64-linux-android29','-nostdlib','-static','-Wl,-e,sub_00BA7100','-Wl,-Ttext=0x40000000',str(out/'harness.o'),str(out/'generated.o'),'-o',str(out/'separate')]
@@ -230,7 +230,7 @@ def main():
             assert actual==expected,(case['name'],variant,actual,expected)
             assert expected['fs0']==0x11223344
             results.append({'case':case,'variant':variant,'trace_events':int.from_bytes(bytes.fromhex(actual['trace'])[:4],'little'),'result':actual})
-    source_pins={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__),ROOT/'generated/ut3/functions_0273.c',ROOT/'android/runtime/recomp_types.h',ROOT/'android/runtime/guest_state_prefix.h',ROOT/'android/host/threads.c']}
+    source_pins={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__),ROOT/'generated/ut3/functions_0273.c',ROOT/'engine/runtime/recomp_types.h',ROOT/'engine/runtime/guest_state_prefix.h',ROOT/'engine/host/threads.c']}
     report={'original_sha256':row['sha256'],'read_only':True,'device_used':False,'cases':results,'comparisons':len(results),'disassembly':disassembly,'commands':commands,'source_pins':source_pins,'result':'PASS','scope':'Original x86 bytes versus extracted current generated C compiled O2 ARM64, production header and generated-only state separation. Synchronization/event/job callees are explicit deterministic fixtures; native scheduling is not simulated.'}
     (ROOT/'research/queued-thread-audit.json').write_text(json.dumps(report,indent=2)+'\n')
     print('PASS original x86 versus current generated O2 ARM64: '+str(len(results))+' comparisons; Run/Assign/Create/start ABI, CS ordering, slot+14 lifetime, stop+10, cleanup; no XCHG in work-slot path')

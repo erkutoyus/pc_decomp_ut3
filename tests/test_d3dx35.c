@@ -5,9 +5,9 @@
 static unsigned debug_messages;
 static void d3dx_test_log(const char *format, ...) { (void)format; ++debug_messages; }
 #define void_log d3dx_test_log
-#include "../android/host/d3dx9.c"
+#include "../engine/host/d3dx9.c"
 #undef void_log
-#include "../android/host/pe.c"
+#include "../engine/host/pe.c"
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }
 

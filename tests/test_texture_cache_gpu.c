@@ -1,6 +1,6 @@
 /* Real GLES cache upload and mod-write fallback using the production resource code. */
-#include "../android/host/d3d9_internal.h"
-#include "../android/texconv/ut3tx.h"
+#include "../engine/host/d3d9_internal.h"
+#include "../engine/textures/ut3tx.h"
 #include <EGL/egl.h>
 #include <assert.h>
 #include <stdarg.h>

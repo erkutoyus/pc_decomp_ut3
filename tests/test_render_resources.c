@@ -8,7 +8,7 @@
 #include "host.h"
 #include <assert.h>
 #include <unistd.h>
-#include "../android/host/d3d9_resource.c"
+#include "../engine/host/d3d9_resource.c"
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }
 

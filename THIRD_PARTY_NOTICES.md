@@ -1,6 +1,8 @@
 # Third-party notices
 
-The Win32/D3D9 compatibility host in `android/host` and the private ARM64 runtime
+Current Apple builds use the shared `engine/` sources, DXVK Native and OpenAL Soft/CoreAudio; macOS also packages pinned Vulkan loader/KosmicKrisp/MoltenVK runtime libraries. iOS links the iOS MoltenVK slice. Android APK, Oboe, NDK and launcher descriptions below are historical provenance; those recipes were retired with the root Android directory. Original source notices and third-party licenses remain retained. See `BUILDING.md` and `docs/apple/CLEANUP_BUILD_STATUS.md`.
+
+The Win32/D3D9 compatibility host in `engine/host` and the private ARM64 runtime
 were copied and adapted from the local Heroes V port, itself based on the local
 The Void port. That project's authored port code is GPL-3.0-or-later; its license
 and original notices are retained in `reference/homm5/`. Upstream-derived portions
@@ -40,7 +42,7 @@ author's other ports and part of this port under its license.
 The game's DLLs import the Visual C++ 2005 runtime. `msvcr80.dll` and `msvcp80.dll`,
 version 8.0.50727.9680 from the build machine's `C:\Windows\WinSxS`, are statically
 translated like the game's own modules, and their PE images are linked into
-`libut3.so` as data (`android/host/pe_builtin.c`). They are Microsoft's redistributable
+`libut3.so` as data (`engine/host/pe_builtin.c`). They are Microsoft's redistributable
 runtime files, © Microsoft Corporation, distributed under the terms of the Microsoft
 Visual C++ 2005 Redistributable Package.
 
@@ -93,7 +95,7 @@ Vulkan C headers); bundled native DirectX headers retain their LGPL and MinGW-w6
 notices, including `reference/dxvk/include/native/directx/COPYING.MinGW-w64.txt`.
 The Android WSI derives from the author's Frostpunk port. The UT3-specific x86 COM
 boundary and Android build overlays are in `android/dxvk/`,
-`android/host/d3d9_dxvk.c`, and `tools/build_dxvk.py`. The native D3D9 DSO is loaded
+`engine/host/d3d9_dxvk.c`, and `tools/build_dxvk.py`. The native D3D9 DSO is loaded
 dynamically and shares the audio dependency's NDK libc++ runtime. In the shipped
 library the build machine's user name in the embedded NDK header paths is replaced
 by equal-length neutral text; no other byte differs. The APK includes these
@@ -120,14 +122,14 @@ used by the author's The Void port: astc-encoder `baff485b0ff36d2f95d28961605106
 and etcpak `3d716e1550023dc5ff8b602636af8b76584e0b66`. Their URLs are in `.gitmodules`;
 source hashes in `dependencies-textures.json` use LF line endings.
 `tools/build_texconv.py` builds them with Android NDK 27.2.12479018. The UT3 package
-reader and cache writer are in `android/texconv/`; the shared codec wrapper derives
+reader and cache writer are in `engine/textures/`; the shared codec wrapper derives
 from that port. The APK includes both upstream notices under `native-licenses/`.
 
 ## OpenSpy compatibility
 
 The port implements the service endpoint, authentication key and lowercase MD5
 changes identified in the user's `mods/fix_mp/dinput8.dll` (the UT3 OpenSpy proxy).
-The implementation is `android/host/openspy.c`; no code from the DLL is loaded or
+The implementation is `engine/host/openspy.c`; no code from the DLL is loaded or
 distributed. The original game files remain unchanged. Upstream project:
 <https://github.com/openspy/ut3-proxy>.
 # AMD FidelityFX

@@ -4,9 +4,9 @@
 static int deny_last_cpu;
 static FILE *power_test_fopen(const char *path, const char *mode);
 #define fopen power_test_fopen
-#include "../android/host/power.c"
+#include "../engine/host/power.c"
 #undef fopen
-#include "../android/host/pe.c"
+#include "../engine/host/pe.c"
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }

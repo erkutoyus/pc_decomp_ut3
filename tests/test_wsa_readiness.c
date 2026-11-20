@@ -1,6 +1,8 @@
 /* Real loopback transports through production WSA exports and event objects. */
-#include "../android/host/network.c"
-#include "../android/host/pe.c"
+#include "../engine/host/network.c"
+#if !defined(__APPLE__)
+#include "../engine/host/pe.c"
+#endif
 #include <assert.h>
 
 void void_process_exit(uint32_t code, int detach) { (void)detach; _exit((int)code); }
@@ -31,10 +33,17 @@ static struct sockaddr_in address_of(uint32_t s)
     struct sockaddr_in address; socklen_t length = sizeof address;
     assert(!getsockname(socket_fd(s, NULL), (struct sockaddr *)&address, &length)); return address;
 }
+static void put_guest_address(const struct sockaddr_in *address)
+{
+    memset(GPTR(scratch), 0, 16);
+    MEM16(scratch) = AF_INET;
+    memcpy(GPTR(scratch + 2), &address->sin_port, 2);
+    memcpy(GPTR(scratch + 4), &address->sin_addr, 4);
+}
 static void bind_guest(uint32_t s)
 {
     struct sockaddr_in address = {.sin_family = AF_INET, .sin_addr.s_addr = htonl(INADDR_LOOPBACK)};
-    memcpy(GPTR(scratch), &address, sizeof address); assert(!CALL("bind", s, scratch, 16));
+    put_guest_address(&address); assert(!CALL("bind", s, scratch, 16));
 }
 static int host_socket(int type, int listening, struct sockaddr_in *address)
 {
@@ -143,7 +152,7 @@ static void tcp_tests(void)
     struct sockaddr_in address;
     int server = host_socket(SOCK_STREAM, 1, &address);
     uint32_t client = socket_guest(1); h = event(); select_events(client, h, 0x33);
-    memcpy(GPTR(scratch), &address, 16);
+    put_guest_address(&address);
     uint32_t connected = CALL("connect", client, scratch, 16);
     assert(!connected || (connected == UINT32_MAX && void_get_last_error() == 10035));
     assert(wait_event(h, 500) == 0 && events(client, h, -1, 0) == (NET_FD_CONNECT | NET_FD_WRITE));
@@ -168,7 +177,7 @@ static void tcp_tests(void)
 
     /* Connect completion can precede the first-ever CONNECT registration. */
     server = host_socket(SOCK_STREAM, 1, &address); client = socket_guest(1); h = event();
-    select_events(client, h, NET_FD_WRITE); memcpy(GPTR(scratch), &address, 16);
+    select_events(client, h, NET_FD_WRITE); put_guest_address(&address);
     connected = CALL("connect", client, scratch, 16); assert(!connected || void_get_last_error() == 10035);
     assert(wait_event(h, 500) == 0 && events(client, h, -1, 0) == NET_FD_WRITE);
     remote = accept(server, NULL, NULL); assert(remote >= 0);
@@ -176,13 +185,20 @@ static void tcp_tests(void)
     assert(wait_event(h, 0) == 0 && events(client, h, -1, 0) == NET_FD_CONNECT);
     close_guest(client); close_event(h); close(remote); close(server);
 
-    int reserved = host_socket(SOCK_STREAM, 0, &address); /* Bound but not listening: deterministic refusal. */
+    int reserved = host_socket(SOCK_STREAM, 0, &address);
+#if defined(__APPLE__)
+    /* Darwin leaves a connection pending while the port is bound without a listener. */
+    close(reserved);
+#endif
     client = socket_guest(1); h = event(); select_events(client, h, NET_FD_CONNECT);
-    memcpy(GPTR(scratch), &address, 16);
+    put_guest_address(&address);
     assert(CALL("connect", client, scratch, 16) == UINT32_MAX && void_get_last_error() == 10035);
     assert(wait_event(h, 1000) == 0 && events(client, h, 4, 10061) == NET_FD_CONNECT);
     assert(!events(client, h, -1, 0));
-    close_guest(client); close_event(h); close(reserved);
+    close_guest(client); close_event(h);
+#if !defined(__APPLE__)
+    close(reserved);
+#endif
     puts("PASS WSA TCP: ACCEPT rearm/inherited selection and nonblocking, CONNECT+WRITE and one-shot history, graceful/abortive CLOSE/error indices, partial reads, EWOULDBLOCK WRITE rearm, refused connection");
 }
 

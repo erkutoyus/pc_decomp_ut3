@@ -8,7 +8,7 @@
 #else
 #include <sys/mman.h>
 #endif
-#include "../android/host/input.c"
+#include "../engine/host/input.c"
 #include "dinput_overflow_reader.h"
 
 static uint32_t ticks,posted_count;

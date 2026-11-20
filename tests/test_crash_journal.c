@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdlib.h>
-#include "../android/host/crash.inc"
+#include "../engine/host/crash.inc"
 
 static void reported(int signo)
 {

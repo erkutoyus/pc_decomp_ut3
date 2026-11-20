@@ -1,5 +1,5 @@
 /* Pending status/guest output contract and actual visible/hidden GLES queries. */
-#include "../android/host/d3d9_internal.h"
+#include "../engine/host/d3d9_internal.h"
 #include <EGL/egl.h>
 #include <assert.h>
 #include <errno.h>
@@ -26,7 +26,7 @@ static int wait_slice(const struct timespec *delay, struct timespec *remaining)
 #define glGetQueryObjectuiv query_value
 #define glFlush query_flush
 #define nanosleep wait_slice
-#include "../android/host/d3d9_resource.c"
+#include "../engine/host/d3d9_resource.c"
 
 uint32_t g_eax,g_ecx,g_edx,g_esp;
 static d3d_query_rt test_query_rt;

@@ -2,7 +2,7 @@
 #include "host.h"
 #include <assert.h>
 #include <unistd.h>
-#include "../android/host/features.c"
+#include "../engine/host/features.c"
 
 int ut3_game_main(const char *, const char *, int);
 static uint32_t method(uint32_t object, uint32_t slot, unsigned count, uint32_t *args)
