@@ -61,6 +61,8 @@ def package(app, output, *, strip_signature=True):
         raise ValueError('Expected a physical-device iOS ARM64 executable, not a macOS/simulator build')
     if info.get('CFBundlePackageType') != 'APPL' or not info.get('CFBundleIdentifier'):
         raise ValueError('Incomplete iOS bundle metadata')
+    if info.get('UIDeviceFamily') != [1, 2]:
+        raise ValueError('Expected universal iPhone/iPad UIDeviceFamily [1, 2]; missing metadata causes iPad compatibility mode')
     for path in app.rglob('*'):
         if path.is_symlink():
             if not path.resolve().is_relative_to(app) or not path.resolve().exists():

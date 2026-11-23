@@ -52,6 +52,12 @@ void ut3_apple_power_status(uint8_t *ac, uint8_t *battery, uint8_t *percent)
     *percent = facts;
 }
 
+@interface UT3IOSViewController : UIViewController
+@end
+@implementation UT3IOSViewController
+- (BOOL)prefersStatusBarHidden { return YES; }
+@end
+
 @interface UT3IOSScene : UIResponder <UIWindowSceneDelegate>
 @property(strong, nonatomic) UIWindow *window;
 @property(strong, nonatomic) UILabel *status;
@@ -73,7 +79,10 @@ void ut3_apple_power_status(uint8_t *ac, uint8_t *battery, uint8_t *percent)
 #if defined(UT3_APPLE_OPENAL)
     AVAudioSession *session = AVAudioSession.sharedInstance;
     NSError *error = nil;
-    if (![session setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault options:0 error:&error] ||
+    // Keep other apps' music playing at its existing volume. The game still
+    // pauses its own audio on suspension and retains foreground recovery.
+    if (![session setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault
+                     options:AVAudioSessionCategoryOptionMixWithOthers error:&error] ||
         ![session setActive:YES error:&error]) {
         self.status.text = [NSString stringWithFormat:@"Could not start audio: %@", error.localizedDescription];
         return NO;
@@ -181,7 +190,7 @@ void ut3_apple_power_status(uint8_t *ac, uint8_t *battery, uint8_t *percent)
     for(NSString *argument in NSProcessInfo.processInfo.arguments)
         if([argument hasPrefix:@"--validate-"]||[argument isEqualToString:@"--selftest"])self.diagnostics=YES;
     if(self.diagnostics)UIApplication.sharedApplication.idleTimerDisabled=YES;
-    UIViewController *controller = [UIViewController new];
+    UIViewController *controller = [UT3IOSViewController new];
     controller.view.backgroundColor = UIColor.blackColor;
     self.window.rootViewController = controller;
     self.status = [[UILabel alloc] initWithFrame:CGRectZero];

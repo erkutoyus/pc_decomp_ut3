@@ -31,7 +31,7 @@ dist/macos/Unreal Tournament 3.app
 
 Open the app and select your original game folder once; the location is remembered for later launches. The app creates **Documents/Unreal Tournament 3/UserData** for profiles/settings/logs. Put **cdkey.txt** in **Documents/Unreal Tournament 3**, next to UserData. The previous Application Support data is moved to UserData only when that destination is absent or empty; populated conflicts are preserved separately. Game assets stay outside the app. Vulkan loader, KosmicKrisp/MoltenVK runtime libraries, DXVK and OpenAL are included in the app; it does not need the development SDK path afterward. The build runs native regression tests and the original headless runtime self-test before packaging. The output is locally ad hoc signed, not notarized for public distribution.
 
-## iPhone / SideStore IPA
+## iPhone and iPad / SideStore IPA
 
 ```sh
 ./build_ios.sh "/path/to/UT3"
@@ -47,11 +47,11 @@ This is an **unsigned physical-device ARM64 IPA** with the standard `Payload/*.a
 
 The IPA is deliberately small: **no original UT3 assets, CD key or saves**. For the first installation:
 
-1. Launch once. The app creates **Game**, **UserData** and a readme directly in its shared files. iOS already labels this app's container **Unreal Tournament 3**—there is no second folder with that name.
-2. In Files, open **On My iPhone → Unreal Tournament 3** (the app), or select **iPhone → Files → Unreal Tournament 3** in Finder. Put your **Game** folder and private **cdkey.txt** directly there, beside UserData:
+1. Launch once. The app creates **Game**, **UserData** and a readme directly in its shared files. iOS already labels this app's container **UT3**—there is no second folder with that name.
+2. In Files, open **On My iPhone/iPad → UT3** (the app), or select **iPhone/iPad → Files → UT3** in Finder. Put your **Game** folder and private **cdkey.txt** directly there, beside UserData:
 
    ```text
-   Unreal Tournament 3       ← iOS app container shown in Files/Finder
+   UT3                      ← iOS app container shown in Files/Finder
      Game/
        Binaries/UT3.exe
        Engine/
@@ -67,6 +67,8 @@ Build 10 safely lifts files from build 9's redundant inner folder into the share
 
 
 The native Keyboard button opens text entry; GameSir/MFi input and touch-as-mouse remain supported. Prefer 1280×720 at the default 60 FPS cap; 1920×1080 remains selectable. Update through the same SideStore app identity; do not uninstall the existing installation for an update.
+
+Build 12 declares native iPhone and iPad support in the same IPA. iPad uses a resizable native window rather than the iPhone compatibility box. The game image preserves its aspect ratio, so a widescreen game resolution can leave bars on an iPad. The audio session mixes with other apps, allowing music to continue while playing; UT3 still pauses its own audio when backgrounded. Physical Spotify coexistence and M2 iPad presentation need owner verification after the SideStore update.
 
 The tested device is iPhone 17 Pro Max on iOS 27.0.1. The build's iOS 18 deployment minimum does not establish compatibility with older devices/OS versions.
 

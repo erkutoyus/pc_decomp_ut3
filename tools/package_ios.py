@@ -29,7 +29,8 @@ def main():
     except plistlib.InvalidFileException:
         parser.error("codesign returned no valid entitlements; check the provisioned app signature and keychain access")
     shutil.copytree(args.app, args.output, dirs_exist_ok=True)
-    for key in ("CFBundleSupportedPlatforms", "MinimumOSVersion", "DTPlatformName", "DTSDKName", "UIDeviceFamily"):
+    # Device families belong to this app, not the provisioning scaffold.
+    for key in ("CFBundleSupportedPlatforms", "MinimumOSVersion", "DTPlatformName", "DTSDKName"):
         if key in profile_info:
             source_info[key] = profile_info[key]
     (args.output / "Info.plist").write_bytes(plistlib.dumps(source_info))

@@ -17,7 +17,8 @@ class IpaTests(unittest.TestCase):
         self.app = self.root/'Unreal Tournament 3.app'
         self.app.mkdir()
         info = {'CFBundleExecutable':'Unreal Tournament 3','CFBundleIdentifier':'org.ut3.port.ios',
-                'CFBundlePackageType':'APPL','CFBundleDisplayName':'Unreal Tournament 3'}
+                'CFBundlePackageType':'APPL','CFBundleDisplayName':'Unreal Tournament 3',
+                'UIDeviceFamily':[1,2]}
         (self.app/'Info.plist').write_bytes(plistlib.dumps(info))
         executable = self.app/info['CFBundleExecutable']
         executable.write_bytes(struct.pack('<8I',0xfeedfacf,0x0100000c,0,2,1,24,0,0)+struct.pack('<6I',0x32,24,2,0,0,0))
@@ -36,6 +37,7 @@ class IpaTests(unittest.TestCase):
             self.assertFalse(any('_CodeSignature' in n or 'mobileprovision' in n for n in names))
             info = plistlib.loads(z.read('Payload/Unreal Tournament 3.app/Info.plist'))
             self.assertEqual(info['CFBundleIdentifier'],'org.ut3.port.ios')
+            self.assertEqual(info['UIDeviceFamily'],[1,2])
             mode = z.getinfo('Payload/Unreal Tournament 3.app/Unreal Tournament 3').external_attr >> 16
             self.assertTrue(mode & stat.S_IXUSR)
         self.assertFalse(receipt['game_assets_bundled'])
@@ -50,6 +52,18 @@ class IpaTests(unittest.TestCase):
             path.unlink()
         (self.app/'Game').mkdir()
         with self.assertRaises(ValueError):package(self.app,self.output,strip_signature=False)
+
+    def test_iphone_compatibility_metadata_is_refused(self):
+        path = self.app/'Info.plist'
+        info = plistlib.loads(path.read_bytes())
+        for families in (None, [1], [2]):
+            if families is None:
+                info.pop('UIDeviceFamily', None)
+            else:
+                info['UIDeviceFamily'] = families
+            path.write_bytes(plistlib.dumps(info))
+            with self.assertRaisesRegex(ValueError, 'universal iPhone/iPad'):
+                package(self.app,self.output,strip_signature=False)
 
     def test_macos_and_simulator_are_refused(self):
         executable = self.app/'Unreal Tournament 3'
