@@ -4,6 +4,7 @@
 static unsigned count, key_events;
 static uint32_t chars[1024];
 int void_machine_is_owned(void) { return 0; }
+void void_input_rumble_observe(void) {}
 int void_touch_game_details(uint32_t out[2]) { (void)out; return 0; }
 int void_touch_game_read(uint32_t out[4]) { (void)out; return 0; }
 int void_touch_steer(float out[3], uint32_t *flags) { (void)out;(void)flags;return 0; }
@@ -15,7 +16,8 @@ int void_touch_ui_scroll(int steps) { (void)steps;return 0; }
 int void_touch_weapon_request(uint32_t request) { (void)request;return 0; }
 void void_loading_movie_input(void) {}
 uint32_t void_tick_ms(void) { return 1; }
-uint64_t void_monotonic_ns(void) { return 1000000; }
+static uint64_t test_clock=1000000;
+uint64_t void_monotonic_ns(void) { return test_clock; }
 uint32_t void_window_main(void) { return 1; }
 void void_log(const char *format,...) { (void)format; }
 void void_post_message(uint32_t window,uint32_t message,uint32_t value,uint32_t parameter)
@@ -26,6 +28,23 @@ void void_post_message(uint32_t window,uint32_t message,uint32_t value,uint32_t 
 }
 int main(void)
 {
+    // Real XInput motor mailbox: exact channel packing, expiry, explicit stop,
+    // disconnected-slot isolation and no replay after reconnection.
+    void_controller_state pad={0};
+    void_input_set_controller(&pad);
+    void_input_pad_rumble(0,12345,54321);
+    assert(void_input_get_rumble()==((12345u<<16)|54321u));
+    void_input_pad_rumble(1,65535,65535);
+    assert(void_input_get_rumble()==((12345u<<16)|54321u));
+    test_clock+=249999999;
+    assert(void_input_get_rumble()!=0);
+    ++test_clock;assert(void_input_get_rumble()==0);
+    void_input_pad_rumble(0,65535,0);assert(void_input_get_rumble()==0xffff0000u);
+    void_input_pad_rumble(0,0,0);assert(void_input_get_rumble()==0);
+    void_input_pad_rumble(0,1,2);
+    void_input_set_controller(NULL);assert(void_input_get_rumble()==0);
+    void_input_set_controller(&pad);assert(void_input_get_rumble()==0);
+    void_input_set_controller(NULL);
     const uint16_t text[]={'A',0x416,0xd83d,0xde00};
     assert(void_input_text_utf16(text,4));
     void_input_pump(); assert(count==4 && chars[0]=='A' && chars[1]==0x416 && chars[2]==0xd83d && chars[3]==0xde00);

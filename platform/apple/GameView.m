@@ -1,4 +1,5 @@
 #import "GameView.h"
+#import "ControllerHaptics.h"
 #import <Carbon/Carbon.h>
 #import <GameController/GameController.h>
 #import <IOKit/hidsystem/IOLLEvent.h>
@@ -61,6 +62,8 @@ static uint8_t controller_trigger(float value)
     CGFloat _lastMouseY;
     BOOL _hasLastMouse;
     GCController *_controller;
+    UT3ControllerHaptics *_haptics;
+    NSTimer *_hapticsTimer;
 }
 
 - (instancetype)initWithFrame:(NSRect)frame
@@ -116,6 +119,7 @@ static uint8_t controller_trigger(float value)
     if (_stopped) return;
     NSArray<GCController *> *controllers = GCController.controllers;
     if (_controller && _controller != disconnected && [controllers containsObject:_controller]) return;
+    [self stopHaptics];
     _controller.extendedGamepad.valueChangedHandler = nil;
     _controller = nil;
     void_input_set_controller(NULL);
@@ -129,8 +133,28 @@ static uint8_t controller_trigger(float value)
             if (view && view->_controller.extendedGamepad == pad) [view publishController:pad];
         };
         [self publishController:controller.extendedGamepad];
+        if(_inputActive)[self startHaptics];
         break;
     }
+}
+
+- (void)stopHaptics
+{
+    [_hapticsTimer invalidate];_hapticsTimer=nil;
+    [_haptics stop];_haptics=nil;
+    void_input_clear_rumble();
+}
+- (void)startHaptics
+{
+    if(!_inputActive||!_controller||_hapticsTimer)return;
+    _haptics=[[UT3ControllerHaptics alloc] initWithController:_controller];
+    if(!_haptics)return;
+    __weak UT3GameView *weak=self;
+    _hapticsTimer=[NSTimer timerWithTimeInterval:1.0/60 repeats:YES block:^(NSTimer *timer) {
+        UT3GameView *view=weak;
+        if(view && view->_inputActive)[view->_haptics updateMotors:void_input_get_rumble()];
+    }];
+    [NSRunLoop.mainRunLoop addTimer:_hapticsTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)controllerChanged:(NSNotification *)event
@@ -150,7 +174,9 @@ static uint8_t controller_trigger(float value)
     if (active) {
         [self selectControllerExcluding:nil];
         [self publishController:_controller.extendedGamepad];
+        [self startHaptics];
     } else {
+        [self stopHaptics];
         void_input_release_physical();
         void_input_set_controller(NULL);
         memset(_keyDown, 0, sizeof _keyDown);
@@ -167,6 +193,7 @@ static uint8_t controller_trigger(float value)
     _controller.extendedGamepad.valueChangedHandler = nil;
     _controller = nil;
 }
+- (void)dealloc { [self stopInput]; }
 
 - (void)recordKey:(NSEvent *)event down:(BOOL)down
 {

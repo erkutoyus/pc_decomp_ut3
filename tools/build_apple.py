@@ -300,10 +300,10 @@ def main():
         build = (args.build_dir or CACHE/args.target).resolve()
         options = ['-DCMAKE_OSX_ARCHITECTURES=arm64', '-DCMAKE_BUILD_TYPE=Release',
                    '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON', '-DPython3_EXECUTABLE='+str(python),
-                   '-DUT3_GENERATED='+str(ROOT/'generated'), '-DUT3_LIFT_OPT_LEVEL=1']
+                   '-DUT3_GENERATED='+str(ROOT/'generated'), '-DUT3_LIFT_OPT_LEVEL=1', '-DUT3_APPLE_SHA1_ROTATES=ON']
         if args.target == 'ios':
             options += ['-DCMAKE_SYSTEM_NAME=iOS', '-DCMAKE_OSX_SYSROOT=iphoneos', '-DCMAKE_OSX_DEPLOYMENT_TARGET=18.0',
-                        '-DBUILD_TESTING=OFF', '-DUT3_APPLE_SHA1_ROTATES=ON', '-DUT3_IOS_BUNDLE_ID='+args.bundle_id,
+                        '-DBUILD_TESTING=OFF', '-DUT3_IOS_BUNDLE_ID='+args.bundle_id,
                         '-DUT3_IOS_DXVK='+str(dxvk), '-DUT3_IOS_OPENAL='+str(audio), '-DUT3_IOS_OPENAL_INCLUDE='+str(headers),
                         '-DUT3_IOS_MOLTENVK='+str(vulkan/'lib/MoltenVK.xcframework/ios-arm64/libMoltenVK.a'),
                         '-DUT3_IOS_VULKAN_INCLUDE='+str(vulkan/'include')]

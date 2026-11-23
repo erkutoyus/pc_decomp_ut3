@@ -168,6 +168,10 @@ def main():
     pins = json.loads((ROOT / "dependencies-dxvk.json").read_text())
     prepare_source(pins, args.source.resolve(), source, platform="apple")
     apply_apple(source)
+    # Share the feature-truthful MoltenVK path already validated on iOS.
+    # Native robustness2 remains selected when the driver provides it.
+    from d3d9_portability import apply_d3d9_portability
+    apply_d3d9_portability(source)
     env = os.environ.copy()
     env["PATH"] = str(args.sdk.resolve() / "bin") + os.pathsep + env["PATH"]
     env["GIT_CEILING_DIRECTORIES"] = str(source.parent)
@@ -180,6 +184,9 @@ def main():
     run(["ninja", "-C", output, "-j", args.jobs], env=env)
     library = output / "src/d3d9/libdxvk_d3d9.dylib"
     receipt = {"upstream": REVISION, "library_sha256": sha(library), "sdk": str(args.sdk.resolve())}
+    receipt["portability_overlay_sha256"] = {
+        name: sha(ROOT / name) for name in ("tools/d3d9_portability.py", "platform/apple/ios/d3d9_unbound.inc")
+    }
     write(output / "receipt.json", json.dumps(receipt, indent=2) + "\n")
     print(library)
 

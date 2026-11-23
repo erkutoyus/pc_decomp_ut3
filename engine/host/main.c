@@ -73,6 +73,10 @@ int ut3_game_main(const char *game, const char *data, int selftest)
     void_threads_init();
     void_dispatch_init();
     if (!void_files_init(game, data)) return 66;
+#if defined(__APPLE__)
+    extern int ut3_apple_controller_config(const char *,const char *);
+    if (!selftest && !ut3_apple_controller_config(game,data)) return 66;
+#endif
     void_files_std_init();
     if (!void_modules_init(NULL)) return 67;
     if (!void_openspy_init()) return 67;

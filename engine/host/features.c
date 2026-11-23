@@ -81,8 +81,59 @@ extern void void_site_cache_init(void);
 extern void void_query_wait_init(void);
 extern void void_rhi_native_init(void);
 
+#if defined(__APPLE__)
+static void_fn rumble_original_update;
+void void_input_rumble_observe(void)
+{
+    static uint64_t last;
+    uint64_t now=void_monotonic_ns();
+    if(last && now-last<UINT64_C(15000000000))return;
+    last=now;
+    uint32_t engine=MEM32(0x01DEB464u);
+    if(!engine||!void_vm_readable(engine+0x290,8))return;
+    uint32_t players=MEM32(engine+0x290),count=MEM32(engine+0x294);
+    if(count<1||count>4||!void_vm_readable(players,4))return;
+    uint32_t player=MEM32(players);
+    if(!player||!void_vm_readable(player+0x40,4))return;
+    uint32_t pc=MEM32(player+0x40);
+    if(!pc||!void_vm_readable(pc+0x440,4))return;
+    uint32_t manager=MEM32(pc+0x440),vt=0,update=0;
+    if(manager&&void_vm_readable(manager,0x50)) {
+        vt=MEM32(manager);
+        if(void_vm_readable(vt+0x110,4))update=MEM32(vt+0x110);
+    }
+    void_log("[rumble-game] XInput poll: players=%u manager=%s update=%08X",
+        count,manager?"present":"absent",update);
+
+}
+static void rumble_game_update(void)
+{
+    uint32_t manager=g_ecx;
+    static uint64_t calls,last_report;
+    ++calls;
+    if(void_vm_readable(manager,0x50)) {
+        uint64_t now=void_monotonic_ns();
+        if(!last_report || now-last_report>=UINT64_C(15000000000)) {
+            last_report=now;
+            void_log("[rumble-game] original Xna update calls=%llu wave=%s paused=%u scale_bits=%08X",
+                (unsigned long long)calls,MEM32(manager+0x40)?"active":"none",
+                (MEM32(manager+0x3C)>>1)&1u,MEM32(manager+0x4C));
+        }
+    }
+    rumble_original_update();
+}
+void void_input_rumble_init(void)
+{
+    rumble_original_update=void_dispatch_find(0x00A12890u);
+    if(rumble_original_update)void_dispatch_add(0x00A12890u,rumble_game_update);
+}
+#endif
+
 void void_features_init(void)
 {
+#if defined(__APPLE__)
+    void_input_rumble_init();
+#endif
     void_site_cache_init();
     void_log("[execution] %s; applies until process restart", void_native_mode(1) ?
              "optimal (ARM64 optimizations; experimental defaults preserved)" :

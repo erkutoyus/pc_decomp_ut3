@@ -7,9 +7,11 @@ find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
 find_library(GAMECONTROLLER_FRAMEWORK GameController REQUIRED)
 find_library(AVFAUDIO_FRAMEWORK AVFAudio REQUIRED)
 find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
-add_executable(ut3-ios MACOSX_BUNDLE platform/apple/ios/Application.m platform/apple/ios/GameView.m platform/apple/DataPaths.m)
+find_library(COREHAPTICS_FRAMEWORK CoreHaptics REQUIRED)
+add_executable(ut3-ios MACOSX_BUNDLE platform/apple/ios/Application.m platform/apple/ios/GameView.m
+    platform/apple/ControllerHaptics.m platform/apple/DataPaths.m)
 target_link_libraries(ut3-ios PRIVATE ut3_build_options ut3_runtime_entry ut3_host ut3_host_threads ut3_lift
-    ${UIKIT_FRAMEWORK} ${FOUNDATION_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} ${AVFAUDIO_FRAMEWORK} ${QUARTZCORE_FRAMEWORK})
+    ${UIKIT_FRAMEWORK} ${FOUNDATION_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} ${AVFAUDIO_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COREHAPTICS_FRAMEWORK})
 target_compile_options(ut3-ios PRIVATE -fobjc-arc -Wall -Wextra -Wno-unused-parameter)
 set(sha1_fixture "${CMAKE_CURRENT_BINARY_DIR}/sha1_rotate_bodies.inc")
 add_custom_command(OUTPUT "${sha1_fixture}"

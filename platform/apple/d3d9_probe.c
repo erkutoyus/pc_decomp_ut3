@@ -2,7 +2,10 @@
  * existing Apple app. The fixture's draw is distinct from the UT3 capture. */
 #include "host.h"
 #include "runtime.h"
+#include "input.h"
 #include <unistd.h>
+extern int void_input_clip_cursor(const int32_t *);
+extern void void_input_clip_bounds(int32_t[4]);
 
 static uint32_t invoke(uint32_t object, unsigned slot, size_t count, const uint32_t *arguments)
 {
@@ -17,9 +20,7 @@ static uint32_t invoke(uint32_t object, unsigned slot, size_t count, const uint3
     if ((int32_t)status < 0) { void_log("[d3d9-probe] %s failed: %08x", #call, status); goto done; } \
 } while (0)
 
-#if defined(UT3_IOS)
 #include "ios/d3d9_portability_probe.inc"
-#endif
 
 static int probe(void)
 {
@@ -49,17 +50,15 @@ static int probe(void)
         void_log("[d3d9-probe] CheckDeviceFormat(%08x)=%08x", formats[n], hr);
         if (hr) goto done;
     }
-#if defined(UT3_IOS)
     const uint32_t backBufferFormat = 21; // Preserve alpha for exact fallback readback checks.
-#else
-    const uint32_t backBufferFormat = 22;
-#endif
     const uint32_t present[14] = {640, 400, backBufferFormat, 1, 0, 0, 1, 0, 1, 1, 75, 0, 0, 0};
     memcpy(GPTR(args), present, sizeof present);
     CHECK(COM(parent, 16, 0, 1, 0, 0x40, args, args + 64));
     device = MEM32(args + 64);
     if (!device) goto done;
     void_log("[d3d9-probe] Device and D24S8-compatible depth surface created");
+    const int32_t initial_clip[4]={0,0,640,400};
+    if(!void_input_clip_cursor(initial_clip))goto done;
     CHECK(COM(device, 23, 4, 4, 1, 0, 21, 1, args + 80, 0));
     texture = MEM32(args + 80);
     if (!texture) goto done;
@@ -69,10 +68,8 @@ static int probe(void)
         memset(GPTR(MEM32(args + 92) + row * MEM32(args + 88)), 0xff, 16);
     CHECK(COM(texture, 20, 0));
 
-#if defined(UT3_IOS)
     if (portability_probe(device, texture, args)) goto done;
     CHECK(COM(device, 89, 0x44));
-#endif
 
     /* ps_3_0: def c0, 1, 0, 0, 1; mov oC0, c0; end. */
     const uint32_t bytecode[] = {0xffff0300, 0x05000051, 0xa00f0000, 0x3f800000, 0, 0, 0x3f800000,
@@ -114,13 +111,23 @@ static int probe(void)
     shader = 0;
     COM(texture, 2);
     texture = 0;
-    static const uint32_t resolutions[][2] = {{1280, 720}, {1920, 1080}};
+    static const uint32_t resolutions[][2] = {{1280, 720}, {1920, 1080}, {640, 480}, {1280, 1024}};
     for (unsigned i = 0; i < sizeof resolutions / sizeof resolutions[0]; ++i) {
         uint32_t width = resolutions[i][0], height = resolutions[i][1];
         memcpy(GPTR(args), present, sizeof present);
         MEM32(args) = width;
         MEM32(args + 4) = height;
         CHECK(COM(device, 16, args));
+        int32_t clip[4];void_input_clip_bounds(clip);
+        void_input_mouse_motion(0,0,(int)width-1,(int)height-1);
+        uint32_t cursor_x,cursor_y;void_input_cursor(&cursor_x,&cursor_y);
+        if(clip[0]||clip[1]||clip[2]!=(int32_t)width||clip[3]!=(int32_t)height||
+           cursor_x!=width-1||cursor_y!=height-1) {
+            void_log("[d3d9-probe] Reset cursor extent failed: %ux%u clip %d,%d..%d,%d cursor %u,%u",
+                width,height,clip[0],clip[1],clip[2],clip[3],cursor_x,cursor_y);
+            goto done;
+        }
+        void_log("[d3d9-probe] %ux%u full clip and bottom-right cursor PASS",width,height);
         CHECK(COM(device, 18, 0, 0, 0, args + 96));
         uint32_t surface = MEM32(args + 96);
         if (!surface) goto done;
@@ -138,6 +145,7 @@ static int probe(void)
     result = 0;
 
 done:
+    void_input_clip_cursor(NULL);
     if (query) COM(query, 2);
     if (shader) COM(shader, 2);
     if (texture) COM(texture, 2);

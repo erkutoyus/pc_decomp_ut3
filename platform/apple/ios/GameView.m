@@ -1,4 +1,5 @@
 #import "GameView.h"
+#import "../ControllerHaptics.h"
 #import <QuartzCore/CAMetalLayer.h>
 #import <GameController/GameController.h>
 #include "input.h"
@@ -20,6 +21,8 @@ static uint8_t trigger(float value) { return (uint8_t)lrintf(fmaxf(0, fminf(1, v
     UITouch *_mouseTouch;
     int _mouseX, _mouseY;
     uint32_t _reportedWidth, _reportedHeight;
+    UT3ControllerHaptics *_haptics;
+    NSTimer *_hapticsTimer;
 }
 + (Class)layerClass { return CAMetalLayer.class; }
 - (instancetype)initWithFrame:(CGRect)frame
@@ -164,6 +167,7 @@ static uint8_t trigger(float value) { return (uint8_t)lrintf(fmaxf(0, fminf(1, v
 {
     if (_stopped) return;
     if (_controller && _controller != removed && [GCController.controllers containsObject:_controller]) return;
+    [self stopHaptics];
     _controller.extendedGamepad.valueChangedHandler = nil;
     _controller = nil; _chord = NO; _reportedInput = NO;
     void_input_set_controller(NULL);
@@ -186,12 +190,31 @@ static uint8_t trigger(float value) { return (uint8_t)lrintf(fmaxf(0, fminf(1, v
     }
     if (!_controller) fprintf(stderr, "[ios-input] no extended MFi controller connected\n");
     [self publish];
+    if(_active)[self startHaptics];
+}
+- (void)stopHaptics
+{
+    [_hapticsTimer invalidate];_hapticsTimer=nil;
+    [_haptics stop];_haptics=nil;
+    void_input_clear_rumble();
+}
+- (void)startHaptics
+{
+    if(!_active||!_controller||_hapticsTimer)return;
+    _haptics=[[UT3ControllerHaptics alloc] initWithController:_controller];
+    if(!_haptics)return;
+    __weak UT3IOSGameView *weak=self;
+    _hapticsTimer=[NSTimer timerWithTimeInterval:1.0/60 repeats:YES block:^(NSTimer *timer) {
+        UT3IOSGameView *view=weak;
+        if(view && view->_active)[view->_haptics updateMotors:void_input_get_rumble()];
+    }];
+    [NSRunLoop.mainRunLoop addTimer:_hapticsTimer forMode:NSRunLoopCommonModes];
 }
 - (void)setInputActive:(BOOL)active
 {
     _active = active;
-    if (!active) { [self cancelPointer];[self resignFirstResponder]; void_input_release_physical(); void_input_set_controller(NULL); }
-    else { [self selectController:nil]; [self publish]; }
+    if (!active) { [self stopHaptics];[self cancelPointer];[self resignFirstResponder]; void_input_release_physical(); void_input_set_controller(NULL); }
+    else { [self selectController:nil]; [self publish]; [self startHaptics]; }
 }
 - (void)stopInput
 {

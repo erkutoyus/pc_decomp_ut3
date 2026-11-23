@@ -16,11 +16,7 @@ set(UT3_GENERATED "${CMAKE_CURRENT_SOURCE_DIR}/generated" CACHE PATH "Complete p
 set(UT3_CALL_PROTOCOL "" CACHE FILEPATH "Optional validated masked call protocol summary")
 set(UT3_X87_LOCALS "" CACHE FILEPATH "Optional x87 local-register plan for the call protocol")
 set(UT3_LIFT_OPT_LEVEL "1" CACHE STRING "Clang optimization level for the lifted C bodies")
-set(sha1_rotate_default OFF)
-if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    set(sha1_rotate_default ON)
-endif()
-option(UT3_APPLE_SHA1_ROTATES "Simplify the pinned SHA-1 guest body's 32-bit rotates" ${sha1_rotate_default})
+option(UT3_APPLE_SHA1_ROTATES "Simplify the pinned SHA-1 guest body's 32-bit rotates" ON)
 
 set(host_dir "${CMAKE_CURRENT_SOURCE_DIR}/engine/host")
 set(host_names
@@ -93,8 +89,10 @@ if(UT3_CALL_PROTOCOL)
 endif()
 
 find_library(COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
-add_library(ut3_host OBJECT ${host_sources} platform/apple/frame.c platform/apple/ProductKey.c)
-target_link_libraries(ut3_host PRIVATE ut3_build_options PUBLIC ${COREFOUNDATION_FRAMEWORK})
+find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
+add_library(ut3_host OBJECT ${host_sources} platform/apple/frame.c platform/apple/ProductKey.c platform/apple/ControllerConfig.m)
+set_source_files_properties(platform/apple/ControllerConfig.m PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+target_link_libraries(ut3_host PRIVATE ut3_build_options PUBLIC ${COREFOUNDATION_FRAMEWORK} ${FOUNDATION_FRAMEWORK})
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(IOKIT_FRAMEWORK IOKit REQUIRED)
     target_sources(ut3_host PRIVATE platform/apple/power.c)
@@ -116,10 +114,12 @@ target_link_libraries(ut3-runtime-selftest PRIVATE ut3_build_options ut3_runtime
 
 find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
 find_library(GAMECONTROLLER_FRAMEWORK GameController REQUIRED)
+find_library(COREHAPTICS_FRAMEWORK CoreHaptics REQUIRED)
 find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
 find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
 add_executable(ut3-macos MACOSX_BUNDLE
     platform/apple/Application.m platform/apple/GameView.m platform/apple/ShellValidation.m platform/apple/DataPaths.m
+    platform/apple/ControllerHaptics.m
 )
 set(ut3_icon "${CMAKE_CURRENT_BINARY_DIR}/UT3.icns")
 add_custom_command(OUTPUT "${ut3_icon}"
@@ -136,7 +136,7 @@ set_target_properties(ut3-macos PROPERTIES
 )
 target_compile_options(ut3-macos PRIVATE "$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:-fobjc-arc>" -Wall -Wextra -Wno-unused-parameter)
 target_link_libraries(ut3-macos PRIVATE ut3_build_options ut3_runtime_entry ut3_host ut3_host_threads ut3_lift
-    ${APPKIT_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COREGRAPHICS_FRAMEWORK}
+    ${APPKIT_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} ${COREHAPTICS_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COREGRAPHICS_FRAMEWORK}
 )
 set(UT3_DXVK_LIBRARY "" CACHE FILEPATH "Pinned macOS native D3D9 dylib for graphics validation")
 set(UT3_VULKAN_SDK "${CMAKE_CURRENT_SOURCE_DIR}/build/apple/phase3-inputs/VulkanSDK/macOS"
@@ -197,6 +197,10 @@ endif()
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(ut3-test-apple-controller-config tests/test_apple_controller_config.m)
+    target_compile_options(ut3-test-apple-controller-config PRIVATE -fobjc-arc -UNDEBUG)
+    target_link_libraries(ut3-test-apple-controller-config PRIVATE "-framework Foundation")
+    add_test(NAME apple-controller-config COMMAND ut3-test-apple-controller-config)
     add_executable(ut3-test-apple-data-paths tests/test_apple_data_paths.m platform/apple/DataPaths.m)
     target_compile_options(ut3-test-apple-data-paths PRIVATE -fobjc-arc -UNDEBUG)
     target_link_libraries(ut3-test-apple-data-paths PRIVATE "-framework Foundation")

@@ -52,6 +52,10 @@ typedef struct {
 /* The native controller owns XInput slot zero while connected. NULL releases it. */
 void void_input_set_controller(const void_controller_state *state);
 int void_input_touch_pad(uint32_t index, uint8_t out[16]);
+/* Latest slot-zero motors (left in high word), with a 250 ms stale-command
+ * cutoff. Clearing on focus loss/disconnect prevents replay on reconnection. */
+uint32_t void_input_get_rumble(void);
+void void_input_clear_rumble(void);
 #endif
 
 /* Scripted input from $VOID_INPUT or <data>/input.txt, if present (script.c). */

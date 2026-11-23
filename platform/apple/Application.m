@@ -39,6 +39,11 @@ static void guest_did_exit(uint32_t code)
 }
 
 #if defined(UT3_APPLE_DXVK)
+static NSString *graphics_backend(void)
+{
+    NSString *choice=[NSUserDefaults.standardUserDefaults stringForKey:@"UT3VulkanBackend"];
+    return [choice isEqual:@"moltenvk"] ? @"moltenvk" : @"kosmickrisp";
+}
 static NSString *prepare_vulkan(void)
 {
     NSString *sdk = [NSBundle.mainBundle objectForInfoDictionaryKey:@"UT3VulkanSDKPath"];
@@ -55,10 +60,11 @@ static NSString *prepare_vulkan(void)
     const char *driver = getenv("VK_DRIVER_FILES");
     const char *legacyDriver = getenv("VK_ICD_FILENAMES");
     if ((!driver || !*driver) && (!legacyDriver || !*legacyDriver)) {
-        NSString *path = [sdk stringByAppendingPathComponent:@"share/vulkan/icd.d/libkosmickrisp_icd.json"];
+        NSString *icd=[graphics_backend() isEqual:@"moltenvk"] ? @"MoltenVK_icd.json" : @"libkosmickrisp_icd.json";
+        NSString *path = [[sdk stringByAppendingPathComponent:@"share/vulkan/icd.d"] stringByAppendingPathComponent:icd];
         if (!path.length || ![NSFileManager.defaultManager isReadableFileAtPath:path] ||
             setenv("VK_DRIVER_FILES", path.fileSystemRepresentation, 1))
-            return @"The configured Vulkan SDK is missing the KosmicKrisp driver.";
+            return @"The selected graphics backend is missing. Rebuild or reinstall the app.";
     }
     void *library = dlopen(loader, RTLD_NOW | RTLD_LOCAL);
     if (!library || !dlsym(library, "vkGetInstanceProcAddr")) {
@@ -119,11 +125,51 @@ static NSString *prepare_vulkan(void)
     open.target = self;
     [fileMenu addItemWithTitle:@"Close Window" action:@selector(performClose:) keyEquivalent:@"w"];
     fileItem.submenu = fileMenu;
+#if defined(UT3_APPLE_DXVK)
+    NSMenuItem *graphicsItem=[[NSMenuItem alloc] init];
+    [menu addItem:graphicsItem];
+    NSMenu *graphics=[[NSMenu alloc] initWithTitle:@"Graphics"];
+    for(NSString *backend in @[@"moltenvk",@"kosmickrisp"]) {
+        NSMenuItem *item=[graphics addItemWithTitle:[backend isEqual:@"moltenvk"] ? @"MoltenVK" : @"KosmicKrisp"
+            action:@selector(chooseGraphicsBackend:) keyEquivalent:@""];
+        item.target=self;item.representedObject=backend;
+    }
+    [graphics addItem:NSMenuItem.separatorItem];
+    NSMenuItem *sync=[graphics addItemWithTitle:@"Vertical Sync" action:@selector(toggleGraphicsSync:) keyEquivalent:@""];
+    sync.target=self;
+    graphicsItem.submenu=graphics;
+#endif
     NSApp.mainMenu = menu;
 }
 
+#if defined(UT3_APPLE_DXVK)
+- (void)graphicsSettingsChanged
+{
+    if(!_workerStarted)return;
+    NSAlert *alert=[NSAlert new];
+    alert.messageText=@"Graphics settings saved";
+    alert.informativeText=@"Restart Unreal Tournament 3 to apply these settings.";
+    [alert beginSheetModalForWindow:_window completionHandler:nil];
+}
+- (void)chooseGraphicsBackend:(NSMenuItem *)item
+{
+    [NSUserDefaults.standardUserDefaults setObject:item.representedObject forKey:@"UT3VulkanBackend"];
+    [self graphicsSettingsChanged];
+}
+- (void)toggleGraphicsSync:(NSMenuItem *)item
+{
+    NSUserDefaults *defaults=NSUserDefaults.standardUserDefaults;
+    [defaults setBool:![defaults boolForKey:@"UT3DisableVSync"] forKey:@"UT3DisableVSync"];
+    [self graphicsSettingsChanged];
+}
+#endif
+
 - (BOOL)validateMenuItem:(NSMenuItem *)item
 {
+#if defined(UT3_APPLE_DXVK)
+    if(item.action==@selector(chooseGraphicsBackend:))item.state=[item.representedObject isEqual:graphics_backend()] ? NSControlStateValueOn : NSControlStateValueOff;
+    if(item.action==@selector(toggleGraphicsSync:))item.state=[NSUserDefaults.standardUserDefaults boolForKey:@"UT3DisableVSync"] ? NSControlStateValueOff : NSControlStateValueOn;
+#endif
     return item.action != @selector(chooseGame:) || !_workerStarted;
 }
 
@@ -270,6 +316,11 @@ static NSString *prepare_vulkan(void)
         setenv("DXVK_STATE_CACHE_PATH", data.fileSystemRepresentation, 1);
         setenv("UT3_RENDERER", "dxvk", 1);
         if (_validation == UT3ValidationNone) {
+            // The stock PC game requests immediate presentation with VSync
+            // disabled. Default to synchronized presentation, with explicit
+            // DXVK_CONFIG / UT3_FPS_LIMIT overrides retained for diagnostics.
+            setenv("DXVK_CONFIG", [NSUserDefaults.standardUserDefaults boolForKey:@"UT3DisableVSync"] ? "d3d9.presentInterval = 0" : "d3d9.presentInterval = 1", 0);
+            setenv("UT3_FPS_LIMIT", "60", 0);
             setenv("UT3_RENDER_WIDTH", "960", 0);
             setenv("UT3_RENDER_HEIGHT", "540", 0);
             setenv("UT3_COMMAND_LINE", "\"C:\\Games\\UT3\\Binaries\\UT3.exe\" UTFrontEnd -nosplash -nomovie -onethread", 0);

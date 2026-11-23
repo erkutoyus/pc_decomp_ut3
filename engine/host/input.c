@@ -10,6 +10,8 @@
 #endif
 
 static pthread_mutex_t input_lock = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t pad_rumble;
+static uint64_t pad_rumble_ns;
 static int screen_w = 1280, screen_h = 720;
 static int cursor_x = 640, cursor_y = 360;
 static int cursor_clip_active;
@@ -1068,6 +1070,7 @@ void void_input_set_controller(const void_controller_state *state)
         if (native_pad_connected) ++touch_packet;
         native_pad = (void_controller_state){0};
         native_pressed = 0;
+        pad_rumble=0;pad_rumble_ns=0;
     }
     native_pad_connected = state != NULL;
     pthread_mutex_unlock(&input_lock);
@@ -1076,6 +1079,17 @@ void void_input_set_controller(const void_controller_state *state)
 static int native_pad_snapshot(uint32_t index, uint8_t out[16])
 {
     if (index) return 0;
+    extern void void_input_rumble_observe(void) __attribute__((weak));
+    if(void_input_rumble_observe && void_machine_is_owned && void_machine_is_owned())void_input_rumble_observe();
+    // Explicit automated gameplay fixture, never enabled by a normal launch.
+    // Exercise original XInput gameplay with a synthetic trigger, not rumble.
+    const char *probe=getenv("UT3_TEST_RUMBLE_PAD");
+    if(probe && !strcmp(probe,"1")) {
+        static int reported;
+        if(!reported) { reported=1;void_log("[rumble-test] synthetic XInput pad enabled; trigger alternates every second"); }
+        void_controller_state sample={.right_trigger=(void_monotonic_ns()/UINT64_C(1000000000))%2 ? 255 : 0};
+        void_input_set_controller(&sample);
+    }
     pthread_mutex_lock(&input_lock);
     int connected = native_pad_connected;
     if (connected) {
@@ -1236,21 +1250,37 @@ extern int void_loading_movie_playing(void) __attribute__((weak));
  * XnaForceFeedbackManager rumble update 00A12890 / stop 00A12670). The
  * manager sends them every frame of play; when none came lately (a menu, a
  * load, the pad taken out of play) the motors stop. */
-static uint32_t pad_rumble;
-static uint64_t pad_rumble_ns;
 
 void void_input_pad_rumble(uint32_t index, uint16_t left, uint16_t right)
 {
     static int logged;
     if (index) return;
     pthread_mutex_lock(&input_lock);
+#if defined(__APPLE__)
+    if(!native_pad_connected)left=right=0;
+#endif
     pad_rumble = (uint32_t)left << 16 | right;
     pad_rumble_ns = void_monotonic_ns();
-    int first = (left || right) && !logged++;
+    int first = (left || right) && !logged;
+    if (left || right) logged=1;
     pthread_mutex_unlock(&input_lock);
     if (first) void_log("[input] first gamepad rumble: motors %u/%u", left, right);
 }
 
+uint32_t void_input_get_rumble(void)
+{
+    pthread_mutex_lock(&input_lock);
+    uint32_t motors = void_monotonic_ns() - pad_rumble_ns < UINT64_C(250000000) ? pad_rumble : 0;
+    pthread_mutex_unlock(&input_lock);
+    return motors;
+}
+
+void void_input_clear_rumble(void)
+{
+    pthread_mutex_lock(&input_lock);
+    pad_rumble=0;pad_rumble_ns=0;
+    pthread_mutex_unlock(&input_lock);
+}
 #ifdef UT3_ANDROID_APP
 JNIEXPORT void JNICALL Java_org_ut3_port_GameActivity_nativeSkipMovie(JNIEnv *env, jclass cls)
 {
@@ -1266,10 +1296,7 @@ JNIEXPORT jboolean JNICALL Java_org_ut3_port_GameActivity_nativeMoviePlaying(JNI
 JNIEXPORT jint JNICALL Java_org_ut3_port_GameActivity_nativeRumble(JNIEnv *env, jclass cls)
 {
     (void)env; (void)cls;
-    pthread_mutex_lock(&input_lock);
-    uint32_t motors = void_monotonic_ns() - pad_rumble_ns < UINT64_C(250000000) ? pad_rumble : 0;
-    pthread_mutex_unlock(&input_lock);
-    return (jint)motors;
+    return (jint)void_input_get_rumble();
 }
 JNIEXPORT jboolean JNICALL Java_org_ut3_port_GameActivity_nativeText(JNIEnv *env, jclass cls,
     jstring value, jlong context)

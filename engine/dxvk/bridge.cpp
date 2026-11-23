@@ -142,11 +142,9 @@ std::atomic<uint32_t> display_width{640},display_height{480};
 std::atomic<uint64_t> backbuffer_extent{};
 
 void publish_backbuffer_extent(const D3DPRESENT_PARAMETERS &params) {
-#if defined(UT3_IOS)
   void_input_resize_surface(params.BackBufferWidth,params.BackBufferHeight);
-  char message[96];snprintf(message,sizeof message,"iOS back buffer/input surface: %ux%u",params.BackBufferWidth,params.BackBufferHeight);
+  char message[96];snprintf(message,sizeof message,"Apple back buffer/input surface: %ux%u",params.BackBufferWidth,params.BackBufferHeight);
   ut3_dxvk_host_log(message);
-#endif
   backbuffer_extent.store((uint64_t(params.BackBufferWidth) << 32) | params.BackBufferHeight,
                           std::memory_order_relaxed);
 }
@@ -258,7 +256,7 @@ D3DPRESENT_PARAMETERS native_parameters(uint32_t va,NativeWindow *window) {
   v.MultiSampleType=D3DMULTISAMPLE_TYPE(p[4]);v.MultiSampleQuality=p[5];v.SwapEffect=D3DSWAPEFFECT(p[6]);v.hDeviceWindow=window;
   v.Windowed=TRUE;v.EnableAutoDepthStencil=p[9];v.AutoDepthStencilFormat=D3DFORMAT(p[10]);v.Flags=p[11];v.FullScreen_RefreshRateInHz=0;v.PresentationInterval=p[13];
   display_width=v.BackBufferWidth? v.BackBufferWidth:640;display_height=v.BackBufferHeight?v.BackBufferHeight:480;
-#if !defined(UT3_IOS)
+#if !defined(__APPLE__)
   void_input_set_screen_size(display_width,display_height);
 #endif
   return v;

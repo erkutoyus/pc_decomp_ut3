@@ -15,7 +15,7 @@
 <key>CFBundleIconFiles</key><array><string>AppIcon60x60</string><string>AppIcon76x76</string></array>
 </dict></dict>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleVersion</key><string>12</string>
+<key>CFBundleVersion</key><string>13</string>
 <!-- Ninja does not run Xcode's TARGETED_DEVICE_FAMILY plist processing. -->
 <key>UIDeviceFamily</key><array><integer>1</integer><integer>2</integer></array>
 <key>CFBundleShortVersionString</key><string>0.7</string>
